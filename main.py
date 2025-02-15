@@ -1,11 +1,45 @@
-# main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 import db_suscripciones
-from models import Suscripcion, Usuario, Ruta, HistorialActividad, Anuncio, SuscripcionAnuncio
+import db_usuario
+from models import *
 from db import get_connection
 from typing import List
+from auth import *
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.openapi.utils import get_openapi
 
-app = FastAPI()
+app = FastAPI(debug=True)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+
+# Modificar Swagger para que solo pida el token JWT
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method["security"] = [{"BearerAuth": []}]
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi 
 
 
 @app.get("/")
@@ -41,160 +75,64 @@ async def create_suscripcion(suscripcion: Suscripcion):
 
 @app.put("/suscripciones/{id_suscripcion}")
 def update_suscripcion(id_suscripcion: int, suscripcion: Suscripcion):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            UPDATE SUSCRIPCIONES
-            SET tipo = %s, precio = %s, duracion = %s, fecha_fin_vigencia = %s, estado_suscripcion = %s
-            WHERE id_suscripciones = %s;
-        """
-        values = (
-            suscripcion.tipo,
-            suscripcion.precio,
-            suscripcion.duracion,
-            suscripcion.fecha_fin_vigencia,
-            suscripcion.estado_suscripcion,
-            id_suscripcion
-        )
-        cur.execute(sql, values)
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Suscripción no encontrada")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Suscripción actualizada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_suscripciones.update(id_suscripcion, suscripcion)
 
 
 @app.delete("/suscripciones/{id_suscripcion}")
 def delete_suscripcion(id_suscripcion: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "DELETE FROM SUSCRIPCIONES WHERE id_suscripciones = %s;", (id_suscripcion,))
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Suscripción no encontrada")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Suscripción eliminada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_suscripciones.delete(id_suscripcion)
 
 # ----- Endpoints para USUARIOS -----
 
-
+# no usado por usuarios reales
 @app.get("/usuarios")
 def get_usuarios():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM USUARIOS;")
-        results = cur.fetchall()
-        cur.close()
-        conn.close()
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    usuarios_data = db_usuario.readAll()
+    if not usuarios_data:
+        raise HTTPException(
+            status_code=404, detail="No se ha encontrado ningun usuario")
+    return usuarios_data
 
-
+# no usado por usuarios reales
 @app.get("/usuarios/{id_usuario}")
 def get_usuario(id_usuario: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM USUARIOS WHERE id_usuarios = %s;", (id_usuario,))
-        usuario = cur.fetchone()
-        cur.close()
-        conn.close()
-        if usuario is None:
-            raise HTTPException(
-                status_code=404, detail="Usuario no encontrado")
-        return usuario
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+    usuario = db_usuario.readById(id_usuario)
+    if usuario is None:
+        raise HTTPException(
+            status_code=404, detail="No se ha encontrado ningún usuario por esta ID"
+        )
+    return usuario
 
 @app.post("/usuarios")
-def create_usuario(usuario: Usuario):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            INSERT INTO USUARIOS (id_usuarios, nombre, apellido, email, contraseña, fecha_registro, id_suscripciones)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
-        """
-        values = (
-            usuario.id_usuarios,
-            usuario.nombre,
-            usuario.apellido,
-            usuario.email,
-            usuario.contraseña,
-            usuario.fecha_registro,
-            usuario.id_suscripciones
-        )
-        cur.execute(sql, values)
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Usuario creado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def create_usuario(usuario: UsuarioCreate):
+    return db_usuario.create(usuario)
 
 
 @app.put("/usuarios/{id_usuario}")
-def update_usuario(id_usuario: int, usuario: Usuario):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            UPDATE USUARIOS
-            SET nombre = %s, apellido = %s, email = %s, contraseña = %s, fecha_registro = %s, id_suscripciones = %s
-            WHERE id_usuarios = %s;
-        """
-        values = (
-            usuario.nombre,
-            usuario.apellido,
-            usuario.email,
-            usuario.contraseña,
-            usuario.fecha_registro,
-            usuario.id_suscripciones,
-            id_usuario
-        )
-        cur.execute(sql, values)
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Usuario no encontrado")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Usuario actualizado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def update_usuario(id_usuario: int, data: UpdateUserRequest):
+    data_filtrada = data.model_dump(exclude_unset=True)
+    return db_usuario.update(id_usuario, data_filtrada)
+
+
+@app.put("/usuarios/password/update")
+def update_password_user(
+    datos: UpdatePasswordRequest,
+    usuario: dict = Depends(obtener_usuario_actual)
+):
+    print("🔹 La función `update_password_user` se ejecutó")  # DEBUG
+    print(f"🔹 Usuario autenticado: {usuario}")  # DEBUG
+    print(f"🔹 Datos recibidos (tipo {type(datos)}): {datos}")  # DEBUG
+    id_usuario = usuario["id_usuario"]
+    return db_usuario.update_password_db(id_usuario, datos.contrasena_actual, datos.nueva_contrasena)
+
+@app.post("/login")
+def login_user(login_data: LoginRequest):
+    return db_usuario.login(login_data)
 
 
 @app.delete("/usuarios/{id_usuario}")
 def delete_usuario(id_usuario: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM USUARIOS WHERE id_usuarios = %s;",
-                    (id_usuario,))
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Usuario no encontrado")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Usuario eliminado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_usuario.delete(id_usuario)
 
 # ----- Endpoints para RUTAS -----
 

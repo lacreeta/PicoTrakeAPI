@@ -12,7 +12,7 @@ def readAll():
             suscripciones = cur.fetchall()
         return suscripciones
     except Exception as e:
-        raise Exception(f"Error de conexión: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de conexión: {e}")
     finally:
         if conn:
             conn.close()
@@ -38,6 +38,7 @@ def create(suscripcion: Suscripcion):
     conn = None
     try:
         conn = get_connection()
+        conn.set_client_encoding('UTF8')
         with conn.cursor() as cur:
             cur.execute("insert into suscripciones (id_suscripciones, tipo, precio, duracion, fecha_fin_vigencia, estado_suscripcion) VALUES (%s, %s, %s, %s, %s, %s)",
                         (suscripcion.id_suscripciones, suscripcion.tipo, suscripcion.precio, suscripcion.duracion, suscripcion.fecha_fin_vigencia, suscripcion.estado_suscripcion))
@@ -64,6 +65,28 @@ def update(id_sucripcion: int, suscripcion: Suscripcion):
         return {"message": "Suscripción actualizada correctamente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()
+
+
+def delete(id_suscripcion: int):
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute(
+                "delete from suscripciones WHERE id_suscripciones = %s", (id_suscripcion,))
+            if cur.rowcount == 0:
+                raise HTTPException(
+                    status_code=404, detail="Suscripción no encontrada")
+        conn.commit()
+        return {"message": "Suscripción eliminada correctamente"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error eliminando suscripción: {str(e)}")
     finally:
         if conn:
             conn.close()
