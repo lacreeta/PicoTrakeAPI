@@ -114,9 +114,6 @@ def update_password_user(
     datos: UpdatePasswordRequest,
     usuario: dict = Depends(obtener_usuario_actual)
 ):
-    print("🔹 La función `update_password_user` se ejecutó")  # DEBUG
-    print(f"🔹 Usuario autenticado: {usuario}")  # DEBUG
-    print(f"🔹 Datos recibidos (tipo {type(datos)}): {datos}")  # DEBUG
     id_usuario = usuario["id_usuario"]
     return db_usuario.update_password_db(id_usuario, datos.contrasena_actual, datos.nueva_contrasena)
 
@@ -124,6 +121,11 @@ def update_password_user(
 def login_user(login_data: LoginRequest):
     return db_usuario.login(login_data)
 
+@app.put("/usuarios/suscription/update")
+def update_suscription_user(
+    datos: UpdateSuscriptionModel,
+    usuario: dict = Depends(obtener_usuario_actual)):
+    return db_usuario.update_suscription(usuario["id_usuario"], datos)
 
 @app.delete("/usuarios/")
 def delete_usuario(

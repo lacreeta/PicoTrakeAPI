@@ -40,8 +40,8 @@ def create(suscripcion: Suscripcion):
         conn = get_connection()
         conn.set_client_encoding('UTF8')
         with conn.cursor() as cur:
-            cur.execute("insert into suscripciones (id_suscripciones, tipo, precio, duracion, fecha_fin_vigencia, estado_suscripcion) VALUES (%s, %s, %s, %s, %s, %s)",
-                        (suscripcion.id_suscripciones, suscripcion.tipo, suscripcion.precio, suscripcion.duracion, suscripcion.fecha_fin_vigencia, suscripcion.estado_suscripcion))
+            cur.execute("insert into suscripciones (id_suscripciones, tipo, precio) VALUES (%s, %s, %s)",
+                        (suscripcion.id_suscripciones, suscripcion.tipo, suscripcion.precio))
         conn.commit()
         return {"message": "Suscripción creada correctamente"}
     except Exception as e:
@@ -56,8 +56,8 @@ def update(id_sucripcion: int, suscripcion: Suscripcion):
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("update suscripciones set tipo = %s, precio = %s, duracion = %s, fecha_fin_vigencia = %s, estado_suscripcion = %s WHERE id_suscripciones = %s",
-                        (suscripcion.tipo, suscripcion.precio, suscripcion.duracion, suscripcion.fecha_fin_vigencia, suscripcion.estado_suscripcion, id_sucripcion))
+            cur.execute("update suscripciones set tipo = %s, precio = %s, estado_suscripcion = %s WHERE id_suscripciones = %s",
+                        (suscripcion.tipo, suscripcion.precio, id_sucripcion))
             if cur.rowcount == 0:
                 raise HTTPException(
                     status_code=404, detail="Suscripción no encontrada")

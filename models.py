@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import date
 
@@ -7,17 +7,14 @@ class Suscripcion(BaseModel):
     id_suscripciones: int
     tipo: str
     precio: Optional[int] = None
-    duracion: int
-    fecha_fin_vigencia: Optional[date] = None
-    estado_suscripcion: str
 
 
 class Usuario(BaseModel):
     id_usuarios: int
     nombre: Optional[str] = None
     apellido: Optional[str] = None
-    email: Optional[str] = None
-    contrasena: Optional[str] = None
+    email: Optional[EmailStr] = None
+    contrasena: Optional[str] = Field(None, min_length=6) 
     fecha_registro: Optional[date] = None
     id_suscripciones: Optional[int] = None
 
@@ -57,8 +54,6 @@ class UsuarioCreate(BaseModel):
     apellido: str
     email: EmailStr
     contrasena: str
-    fecha_registro: date
-    id_suscripciones: int
 
 class UpdatePasswordRequest(BaseModel):
     contrasena_actual: str
@@ -83,3 +78,8 @@ class UpdateUserRequest(BaseModel):
     nombre: Optional[str] = None
     apellido: Optional[str] = None
     email: Optional[EmailStr] = None
+
+class UpdateSuscriptionModel(BaseModel):
+    id_suscripcion: int
+    duracion: int = Field(..., description="Duración en meses (1 o 12)") 
+    

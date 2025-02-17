@@ -5,6 +5,9 @@ from passlib.context import CryptContext
 from auth import *
 from psycopg2.extras import RealDictRow
 from typing import cast
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from fastapi import HTTPException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -49,9 +52,10 @@ def create(usuario: UsuarioCreate):
                 raise HTTPException(
                     status_code=400, detail="La contraseña es obligatoria")
             hashed_password = pwd_context.hash(usuario.contrasena)
-            cur.execute("INSERT INTO usuarios (nombre, apellido, email, contrasena, fecha_registro, id_suscripciones) "
-                        "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id_usuarios",
-                        (usuario.nombre, usuario.apellido, usuario.email, hashed_password, usuario.fecha_registro, usuario.id_suscripciones))
+            fecha_registro = date.today()
+            cur.execute("INSERT INTO usuarios (nombre, apellido, email, contrasena, fecha_registro) "
+                        "VALUES (%s, %s, %s, %s, %s) RETURNING id_usuarios",
+                        (usuario.nombre, usuario.apellido, usuario.email, hashed_password, fecha_registro))
             resultado = cur.fetchone()
             resultado = cast(RealDictRow, resultado)
             if resultado is None:
@@ -203,5 +207,34 @@ def delete(id_usuario: int, contrasena: str):
         raise HTTPException(
             status_code=500, detail=f"Error eliminando usuario: {str(e)}")
     finally:
+        if conn:
+            conn.close()
+
+def update_suscription(id_usuario: int, suscripcion_data: UpdateSuscriptionModel): 
+    conn = None
+    try: 
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("select from usuarios where id_usuarios = %s", (id_usuario,))
+            resultado = cur.fetchone()
+            if resultado is None: 
+                raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+            duracion = suscripcion_data.duracion
+            if duracion not in [1, 12]:
+                raise HTTPException(status_code=400, detail="Duración de suscripción no válida. Solo se permite 1 mes o 12 meses.")
+           
+            fecha_inicio = date.today()
+            fecha_final = fecha_inicio + relativedelta(months=duracion)
+            cur.execute("update usuarios set id_suscripciones =%s, fecha_inicio_suscripcion =%s, fecha_final_suscripcion =%s where id_usuarios = %s", 
+                        (suscripcion_data.id_suscripcion, fecha_inicio, fecha_final, id_usuario))
+        conn.commit()
+        return {"message": "Suscripción actualizada correctamente"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error actualizando suscripción del usuario: {str(e)}")
+    finally: 
         if conn:
             conn.close()
