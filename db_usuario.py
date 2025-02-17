@@ -171,24 +171,37 @@ def login(login_data: LoginRequest) -> dict:
         if conn:
             conn.close()
 
-
-def delete(id_usuario: int):
+def delete(id_usuario: int, contrasena: str):
     conn = None
     try:
         conn = get_connection()
         with conn.cursor() as cur:
             cur.execute(
-                "delete from usuario where id_usuario = %s", (id_usuario,))
-            if cur.rowcount == 0:
+                "select contrasena from usuarios where id_usuarios = %s", (id_usuario,) )
+            resultado = cur.fetchone()
+            if resultado is None: 
                 raise HTTPException(
                     status_code=404, detail="Usuario no encontrado")
+            resultado = cast(RealDictRow, resultado)
+            if resultado is None:
+                raise HTTPException(
+                    status_code=500, detail="Error: No se devolvió ningún ID tras el cambio.")
+            contrasena_hash = resultado["contrasena"]
+
+            if not pwd_context.verify(contrasena, contrasena_hash):
+                raise HTTPException(
+                    status_code=401, detail="La contrasena actual es incorrecta")
+
+            cur.execute(
+                "delete from usuarios where id_usuarios = %s", (id_usuario,))
+            print(cur.rowcount)
         conn.commit()
-        return {"message": "Usuario eliminada correctamente"}
+        return {"message": "Usuario eliminado correctamente"}
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error eliminando suscripción: {str(e)}")
+            status_code=500, detail=f"Error eliminando usuario: {str(e)}")
     finally:
         if conn:
             conn.close()

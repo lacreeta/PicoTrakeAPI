@@ -12,7 +12,7 @@ app = FastAPI(debug=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-# Modificar Swagger para que solo pida el token JWT
+# Modificar Swagger para que solo pida el token JWT al autenticarse
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -48,7 +48,6 @@ def read_root():
 
 # ----- Endpoints para SUSCRIPCIONES -----
 
-
 @app.get("/suscripciones", response_model=List[Suscripcion])
 def get_suscripciones():
     suscripciones_data = db_suscripciones.readAll()
@@ -56,7 +55,6 @@ def get_suscripciones():
         raise HTTPException(
             status_code=404, detail="No se ha encontrado ninguna suscripción")
     return suscripciones_data
-
 
 @app.get("/suscripciones/{id_suscripcion}")
 def get_suscripcion(id_suscripcion: int):
@@ -67,16 +65,13 @@ def get_suscripcion(id_suscripcion: int):
             status_code=404, detail="No se ha encontrado ninguna suscripción por esta ID")
     return suscripcion
 
-
 @app.post("/suscripciones")
 async def create_suscripcion(suscripcion: Suscripcion):
     return db_suscripciones.create(suscripcion)
 
-
 @app.put("/suscripciones/{id_suscripcion}")
 def update_suscripcion(id_suscripcion: int, suscripcion: Suscripcion):
     return db_suscripciones.update(id_suscripcion, suscripcion)
-
 
 @app.delete("/suscripciones/{id_suscripcion}")
 def delete_suscripcion(id_suscripcion: int):
@@ -130,12 +125,15 @@ def login_user(login_data: LoginRequest):
     return db_usuario.login(login_data)
 
 
-@app.delete("/usuarios/{id_usuario}")
-def delete_usuario(id_usuario: int):
-    return db_usuario.delete(id_usuario)
-
+@app.delete("/usuarios/")
+def delete_usuario(
+    datos: DeleteUser,
+    usuario: dict = Depends(obtener_usuario_actual)              
+    ):
+    id_usuario = usuario["id_usuario"]
+    return db_usuario.delete(id_usuario, datos.contrasena)
+    
 # ----- Endpoints para RUTAS -----
-
 
 @app.get("/rutas")
 def get_rutas():
@@ -165,7 +163,6 @@ def get_ruta(id_ruta: int):
         return ruta
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/rutas")
 def create_ruta(ruta: Ruta):

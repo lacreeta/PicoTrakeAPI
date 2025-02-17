@@ -64,6 +64,9 @@ class UpdatePasswordRequest(BaseModel):
     contrasena_actual: str
     nueva_contrasena: str
 
+class DeleteUser(BaseModel):
+    contrasena: str
+
 class UsuarioResponse(BaseModel):
     id_usuarios: int
     nombre: Optional[str] = None
