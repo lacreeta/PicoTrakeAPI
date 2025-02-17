@@ -1,5 +1,7 @@
 CREATE DATABASE BBDD_projecte;
 
+\c BBDD_projecte;
+
 -- Tabla de SUSCRIPCIONES
 CREATE TABLE SUSCRIPCIONES (
     id_suscripciones INT PRIMARY KEY,
@@ -58,37 +60,3 @@ CREATE TABLE SUSCRIPCIONES_ANUNCIOS (
     FOREIGN KEY (id_suscripciones) REFERENCES SUSCRIPCIONES(id_suscripciones) ON DELETE CASCADE,
     FOREIGN KEY (id_anuncios) REFERENCES ANUNCIOS(id_anuncios) ON DELETE CASCADE
 );
-
-
--- Trigger para la tabla Usuarios
-
-
-
-CREATE OR REPLACE FUNCTION reset_identity_if_empty()
-RETURNS TRIGGER AS $$
-DECLARE
-    total_registros INT;
-BEGIN
-    -- Contar cuántos registros quedan en la tabla usuarios
-    SELECT COUNT(*) INTO total_registros FROM usuarios;
-
-    -- Si la tabla está vacía, reiniciar el IDENTITY
-    IF total_registros = 0 THEN
-        -- Reinicia el ID sin afectar transacciones activas
-        PERFORM pg_advisory_lock(12345); -- Bloquea para evitar concurrencia
-        EXECUTE 'ALTER TABLE usuarios ALTER COLUMN id_usuarios RESTART WITH 1';
-        PERFORM pg_advisory_unlock(12345); -- Desbloquea después de la ejecución
-    END IF;
-
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE TRIGGER trigger_reset_identity
-AFTER DELETE ON usuarios
-FOR EACH STATEMENT
-EXECUTE FUNCTION reset_identity_if_empty();
-
-
-
