@@ -12,7 +12,7 @@ def readAll():
             suscripciones = cur.fetchall()
         return suscripciones
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error de conexión: {e}")
+        raise HTTPException(status_code=500, detail=f"No se ha encontrado ninguna suscripción.")
     finally:
         if conn:
             conn.close()
@@ -38,7 +38,6 @@ def create(suscripcion: Suscripcion):
     conn = None
     try:
         conn = get_connection()
-        conn.set_client_encoding('UTF8')
         with conn.cursor() as cur:
             cur.execute("insert into suscripciones (id_suscripciones, tipo, precio) VALUES (%s, %s, %s)",
                         (suscripcion.id_suscripciones, suscripcion.tipo, suscripcion.precio))

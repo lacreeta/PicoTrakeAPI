@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
+import db_rutas
 import db_suscripciones
 import db_usuario
 from models import *
@@ -139,84 +140,24 @@ def delete_usuario(
 
 @app.get("/rutas")
 def get_rutas():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM RUTAS;")
-        results = cur.fetchall()
-        cur.close()
-        conn.close()
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_rutas.readAll
 
-
-@app.get("/rutas/{id_ruta}")
+@app.get("/rutas/id/{id_ruta}")
 def get_ruta(id_ruta: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM RUTAS WHERE id_ruta = %s;", (id_ruta,))
-        ruta = cur.fetchone()
-        cur.close()
-        conn.close()
-        if ruta is None:
-            raise HTTPException(status_code=404, detail="Ruta no encontrada")
-        return ruta
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_rutas.readById(id_ruta)
+
+@app.get("/rutas/nombre/{nombre_ruta}")
+def get_ruta_by_name(nombre_ruta:str):
+    return db_rutas.readByName(nombre_ruta)
 
 @app.post("/rutas")
 def create_ruta(ruta: Ruta):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            INSERT INTO RUTAS (id_ruta, nombre_ruta, dificultad, ubicacion, descripcion)
-            VALUES (%s, %s, %s, %s, %s);
-        """
-        values = (
-            ruta.id_ruta,
-            ruta.nombre_ruta,
-            ruta.dificultad,
-            ruta.ubicacion,
-            ruta.descripcion
-        )
-        cur.execute(sql, values)
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Ruta creada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_rutas.create(ruta)
 
 
-@app.put("/rutas/{id_ruta}")
-def update_ruta(id_ruta: int, ruta: Ruta):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            UPDATE RUTAS
-            SET nombre_ruta = %s, dificultad = %s, ubicacion = %s, descripcion = %s
-            WHERE id_ruta = %s;
-        """
-        values = (
-            ruta.nombre_ruta,
-            ruta.dificultad,
-            ruta.ubicacion,
-            ruta.descripcion,
-            id_ruta
-        )
-        cur.execute(sql, values)
-        if cur.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Ruta no encontrada")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Ruta actualizada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.put("/rutas/{nombre_ruta}")
+def update_ruta(nombre_ruta: str, ruta: Ruta):
+    return db_rutas.update(nombre_ruta, ruta)
 
 
 @app.delete("/rutas/{id_ruta}")

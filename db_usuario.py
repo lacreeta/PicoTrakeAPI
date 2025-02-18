@@ -49,29 +49,35 @@ def create(usuario: UsuarioCreate):
         conn = get_connection()
         with conn.cursor() as cur:
             if usuario.contrasena is None:
-                raise HTTPException(
-                    status_code=400, detail="La contraseña es obligatoria")
+                raise HTTPException(status_code=400, detail="La contraseña es obligatoria")
             hashed_password = pwd_context.hash(usuario.contrasena)
             fecha_registro = date.today()
-            cur.execute("INSERT INTO usuarios (nombre, apellido, email, contrasena, fecha_registro) "
-                        "VALUES (%s, %s, %s, %s, %s) RETURNING id_usuarios",
-                        (usuario.nombre, usuario.apellido, usuario.email, hashed_password, fecha_registro))
+            cur.execute("SELECT id_usuarios FROM usuarios WHERE email = %s", (usuario.email,))
             resultado = cur.fetchone()
             resultado = cast(RealDictRow, resultado)
-            if resultado is None:
-                raise HTTPException(
-                    status_code=500, detail="Error: No se devolvió ningún ID tras el INSERT.")
-            new_id = resultado["id_usuarios"]
+            if resultado:
+                raise HTTPException(status_code=400, detail="Error: El email ya está registrado.")
+            else:
+                cur.execute("""
+                    INSERT INTO usuarios (nombre, apellido, email, contrasena, fecha_registro)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (email) DO NOTHING 
+                    RETURNING id_usuarios
+                """, (usuario.nombre, usuario.apellido, usuario.email, hashed_password, fecha_registro))
+                resultado = cur.fetchone()
+                resultado = cast(RealDictRow, resultado)
+                if resultado: 
+                    new_id = resultado["id_usuarios"]
+                else:
+                    raise HTTPException(status_code=400, detail="Error: El email ya está registrado.")
+
         conn.commit()
         return {"message": "Usuario creado correctamente", "id_usuarios": new_id}
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         if conn:
             conn.close()
-
 
 def update(id_usuario: int, data: dict):
     conn = None

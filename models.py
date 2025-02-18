@@ -1,3 +1,4 @@
+from turtle import st
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import date
@@ -82,4 +83,3 @@ class UpdateUserRequest(BaseModel):
 class UpdateSuscriptionModel(BaseModel):
     id_suscripcion: int
     duracion: int = Field(..., description="Duración en meses (1 o 12)") 
-    
