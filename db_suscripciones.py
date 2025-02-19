@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from db import get_connection
-from models import Suscripcion
+from models import Suscripcion, SuscriptionUpdate
 
 
 def readAll():
@@ -50,12 +50,12 @@ def create(suscripcion: Suscripcion):
             conn.close()
 
 
-def update(id_sucripcion: int, suscripcion: Suscripcion):
+def update(id_sucripcion: int, suscripcion: SuscriptionUpdate):
     conn = None
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("update suscripciones set tipo = %s, precio = %s, estado_suscripcion = %s WHERE id_suscripciones = %s",
+            cur.execute("update suscripciones set tipo = %s, precio = %s WHERE id_suscripciones = %s",
                         (suscripcion.tipo, suscripcion.precio, id_sucripcion))
             if cur.rowcount == 0:
                 raise HTTPException(

@@ -56,8 +56,8 @@ def create(ruta: Ruta):
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("insert into rutas (id_ruta, nombre_ruta, dificultad, ubicacion, descripcion) VALUES (%s, %s, %s, %s, %s)",
-                        (ruta.id_ruta, ruta.nombre_ruta, ruta.dificultad, ruta.ubicacion, ruta.descripcion))
+            cur.execute("insert into rutas (nombre_ruta, dificultad, ubicacion, descripcion) VALUES (%s, %s, %s, %s)",
+                        (ruta.nombre_ruta, ruta.dificultad, ruta.ubicacion, ruta.descripcion))
         conn.commit()
         return {"message": "Ruta creada correctamente"}
     except Exception as e:

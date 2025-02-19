@@ -1,4 +1,3 @@
-from turtle import st
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import date
@@ -7,7 +6,7 @@ from datetime import date
 class Suscripcion(BaseModel):
     id_suscripciones: int
     tipo: str
-    precio: Optional[int] = None
+    precio: Optional[float] = None
 
 
 class Usuario(BaseModel):
@@ -21,7 +20,6 @@ class Usuario(BaseModel):
 
 
 class Ruta(BaseModel):
-    id_ruta: int
     nombre_ruta: Optional[str] = None
     dificultad: Optional[str] = None
     ubicacion: Optional[str] = None
@@ -80,6 +78,10 @@ class UpdateUserRequest(BaseModel):
     apellido: Optional[str] = None
     email: Optional[EmailStr] = None
 
-class UpdateSuscriptionModel(BaseModel):
+class UpdateSuscriptionUserModel(BaseModel):
     id_suscripcion: int
     duracion: int = Field(..., description="Duración en meses (1 o 12)") 
+
+class SuscriptionUpdate(BaseModel):
+    tipo: str
+    precio: float

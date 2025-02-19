@@ -1,0 +1,1 @@
+visores: https://www.icgc.cat/ca/Geoinformacio-i-mapes/Servei-de-Mapa-Base

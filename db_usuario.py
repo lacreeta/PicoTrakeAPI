@@ -216,7 +216,7 @@ def delete(id_usuario: int, contrasena: str):
         if conn:
             conn.close()
 
-def update_suscription(id_usuario: int, suscripcion_data: UpdateSuscriptionModel): 
+def update_suscription(id_usuario: int, suscripcion_data: UpdateSuscriptionUserModel): 
     conn = None
     try: 
         conn = get_connection()

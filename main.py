@@ -71,7 +71,7 @@ async def create_suscripcion(suscripcion: Suscripcion):
     return db_suscripciones.create(suscripcion)
 
 @app.put("/suscripciones/{id_suscripcion}")
-def update_suscripcion(id_suscripcion: int, suscripcion: Suscripcion):
+def update_suscripcion(id_suscripcion: int, suscripcion: SuscriptionUpdate):
     return db_suscripciones.update(id_suscripcion, suscripcion)
 
 @app.delete("/suscripciones/{id_suscripcion}")
@@ -104,13 +104,16 @@ async def create_usuario(usuario: UsuarioCreate):
     return db_usuario.create(usuario)
 
 
-@app.put("/usuarios/{id_usuario}")
-def update_usuario(id_usuario: int, data: UpdateUserRequest):
+@app.put("/usuarios/update")
+def update_usuario(
+    data: UpdateUserRequest, 
+    usuario:dict = Depends(obtener_usuario_actual)
+    ):
     data_filtrada = data.model_dump(exclude_unset=True)
-    return db_usuario.update(id_usuario, data_filtrada)
+    return db_usuario.update(usuario["id_usuario"], data_filtrada)
 
 
-@app.put("/usuarios/password/update")
+@app.put("/usuarios/update/password")
 def update_password_user(
     datos: UpdatePasswordRequest,
     usuario: dict = Depends(obtener_usuario_actual)
@@ -122,9 +125,9 @@ def update_password_user(
 def login_user(login_data: LoginRequest):
     return db_usuario.login(login_data)
 
-@app.put("/usuarios/suscription/update")
+@app.put("/usuarios/update/suscription")
 def update_suscription_user(
-    datos: UpdateSuscriptionModel,
+    datos: UpdateSuscriptionUserModel,
     usuario: dict = Depends(obtener_usuario_actual)):
     return db_usuario.update_suscription(usuario["id_usuario"], datos)
 
@@ -142,11 +145,11 @@ def delete_usuario(
 def get_rutas():
     return db_rutas.readAll
 
-@app.get("/rutas/id/{id_ruta}")
+@app.get("/rutas/{id_ruta:int}")
 def get_ruta(id_ruta: int):
     return db_rutas.readById(id_ruta)
 
-@app.get("/rutas/nombre/{nombre_ruta}")
+@app.get("/rutas/{nombre_ruta:str}")
 def get_ruta_by_name(nombre_ruta:str):
     return db_rutas.readByName(nombre_ruta)
 
