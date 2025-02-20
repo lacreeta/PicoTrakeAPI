@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
+import db_historial
 import db_rutas
 import db_suscripciones
 import db_usuario
@@ -181,88 +182,25 @@ def delete_ruta(id_ruta: int):
 # ----- Endpoints para HISTORIAL DE ACTIVIDADES -----
 
 
-@app.get("/historial")
-def get_historial():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM historial_actividades;")
-        results = cur.fetchall()
-        cur.close()
-        conn.close()
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.get("/historial/usuario/mis-actividades")
+def get_historial(usuario: dict = Depends(obtener_usuario_actual)):
+    id_usuario = usuario["id_usuario"]
+    return db_historial.getAll(id_usuario)
 
+@app.get("/historial/usuario/{nombre_ruta:str}")
+def get_historial_by_route(nombre_ruta:str, usuario: dict = Depends(obtener_usuario_actual)):
+    id_usuario = usuario["id_usuario"]
+    return db_historial.getByRoute(id_usuario, nombre_ruta)
 
-@app.get("/historial/{id_historial}")
-def get_historial_item(id_historial: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM historial_actividades WHERE id_historial = %s;", (id_historial,))
-        historial = cur.fetchone()
-        cur.close()
-        conn.close()
-        if historial is None:
-            raise HTTPException(
-                status_code=404, detail="Historial no encontrado")
-        return historial
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.get("/historial/usuarios/filtrar")
+def get_historial_by_date(fecha_inicio: str, fecha_final: str, 
+                          usuario : dict = Depends(obtener_usuario_actual)):
+    id_usuario = usuario["id_usuario"]
+    return db_historial.getByDate(id_usuario, fecha_inicio, fecha_final)
 
-
-@app.post("/historial")
+@app.put("/historial/")
 def create_historial(historial: HistorialActividad):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            INSERT INTO historial_actividades (id_historial, id_usuarios, id_ruta, fecha)
-            VALUES (%s, %s, %s, %s);
-        """
-        values = (
-            historial.id_historial,
-            historial.id_usuarios,
-            historial.id_ruta,
-            historial.fecha
-        )
-        cur.execute(sql, values)
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Historial de actividad creado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.put("/historial/{id_historial}")
-def update_historial(id_historial: int, historial: HistorialActividad):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            UPDATE historial_actividades
-            SET id_usuarios = %s, id_ruta = %s, fecha = %s
-            WHERE id_historial = %s;
-        """
-        values = (
-            historial.id_usuarios,
-            historial.id_ruta,
-            historial.fecha,
-            id_historial
-        )
-        cur.execute(sql, values)
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Historial no encontrado")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Historial de actividad actualizado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_historial.create(historial)
 
 
 @app.delete("/historial/{id_historial}")

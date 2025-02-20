@@ -27,7 +27,6 @@ class Ruta(BaseModel):
 
 
 class HistorialActividad(BaseModel):
-    id_historial: int
     id_usuarios: int
     id_ruta: int
     fecha: Optional[date] = None
