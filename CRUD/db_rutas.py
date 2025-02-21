@@ -1,7 +1,7 @@
 from typing import cast
 from fastapi import HTTPException
 from db import get_connection
-from models import Ruta
+from model.models import Ruta
 from psycopg2.extras import RealDictRow
 
 def readAll():
@@ -98,3 +98,16 @@ def update(nombre_ruta: str, ruta: Ruta):
         if conn:
             conn.close()
 
+def delete(nombre_ruta:str):
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute(""" delete from rutas where nombre_ruta = %s""",(nombre_ruta))
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=400, detail=f"No se ha encontrado la ruta: {nombre_ruta}")
+            conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al eliminar la ruta: {e}")
+    finally:
+        if conn:
+            conn.close()

@@ -1,9 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
-import db_historial
-import db_rutas
-import db_suscripciones
-import db_usuario
-from models import *
+from CRUD import db_anuncios, db_usuario, db_historial, db_suscripciones, db_rutas
+from model.models import *
 from db import get_connection
 from typing import List
 from auth import *
@@ -163,24 +160,13 @@ def create_ruta(ruta: Ruta):
 def update_ruta(nombre_ruta: str, ruta: Ruta):
     return db_rutas.update(nombre_ruta, ruta)
 
-
-@app.delete("/rutas/{id_ruta}")
-def delete_ruta(id_ruta: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM RUTAS WHERE id_ruta = %s;", (id_ruta,))
-        if cur.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Ruta no encontrada")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Ruta eliminada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# endpoint para desarrolladores
+@app.delete("/rutas/{nombre_ruta:str}")
+def delete_ruta(nombre_ruta:str):
+    return db_rutas.delete(nombre_ruta)
+    
 
 # ----- Endpoints para HISTORIAL DE ACTIVIDADES -----
-
 
 @app.get("/historial/usuario/mis-actividades")
 def get_historial(usuario: dict = Depends(obtener_usuario_actual)):
@@ -203,227 +189,32 @@ def create_historial(historial: HistorialActividad):
     return db_historial.create(historial)
 
 
-@app.delete("/historial/{id_historial}")
-def delete_historial(id_historial: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "DELETE FROM historial_actividades WHERE id_historial = %s;", (id_historial,))
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Historial no encontrado")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Historial de actividad eliminado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.delete("/usuario/historial")
+def delete_historial(usuario: dict = Depends(obtener_usuario_actual)):
+    id_usuario = usuario["id_usuario"]
+    return db_historial.deleteAll(id_usuario)
+
+@app.delete("/usuario/historial/{nombre_ruta:str}")
+def delete_historial_by_route(nombre_ruta:str, usuario:dict = Depends(obtener_usuario_actual)):
+    id_usuario = usuario["id_usuario"]
+    return db_historial.deleteByRoute(id_usuario, nombre_ruta)
 
 # ----- Endpoints para ANUNCIOS -----
 
-
 @app.get("/anuncios")
-def get_anuncios():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM ANUNCIOS;")
-        results = cur.fetchall()
-        cur.close()
-        conn.close()
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def get_anuncios(usuario: dict = Depends(obtener_usuario_actual)):
+    id_usuario = usuario["id_usuario"]
+    return db_anuncios.getAnunciosParaUsuario(id_usuario)
 
-
-@app.get("/anuncios/{id_anuncio}")
-def get_anuncio(id_anuncio: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM ANUNCIOS WHERE id_anuncios = %s;", (id_anuncio,))
-        anuncio = cur.fetchone()
-        cur.close()
-        conn.close()
-        if anuncio is None:
-            raise HTTPException(
-                status_code=404, detail="Anuncio no encontrado")
-        return anuncio
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
+# endpoint para desarrolladores
 @app.post("/anuncios")
 def create_anuncio(anuncio: Anuncio):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            INSERT INTO ANUNCIOS (id_anuncios, titulo, contenido, id_suscripciones)
-            VALUES (%s, %s, %s, %s);
-        """
-        values = (
-            anuncio.id_anuncios,
-            anuncio.titulo,
-            anuncio.contenido,
-            anuncio.id_suscripciones
-        )
-        cur.execute(sql, values)
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Anuncio creado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_anuncios.create(anuncio)
 
-
-@app.put("/anuncios/{id_anuncio}")
-def update_anuncio(id_anuncio: int, anuncio: Anuncio):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            UPDATE ANUNCIOS
-            SET titulo = %s, contenido = %s, id_suscripciones = %s
-            WHERE id_anuncios = %s;
-        """
-        values = (
-            anuncio.titulo,
-            anuncio.contenido,
-            anuncio.id_suscripciones,
-            id_anuncio
-        )
-        cur.execute(sql, values)
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Anuncio no encontrado")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Anuncio actualizado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
+# endpoint para desarrolladores
 @app.delete("/anuncios/{id_anuncio}")
 def delete_anuncio(id_anuncio: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM ANUNCIOS WHERE id_anuncios = %s;",
-                    (id_anuncio,))
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Anuncio no encontrado")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Anuncio eliminado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return db_anuncios.delete(id_anuncio)
 
 # ----- Endpoints para SUSCRIPCIONES_ANUNCIOS -----
 
-
-@app.get("/suscripciones_anuncios")
-def get_suscripciones_anuncios():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM SUSCRIPCIONES_ANUNCIOS;")
-        results = cur.fetchall()
-        cur.close()
-        conn.close()
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/suscripciones_anuncios/{id_sa}")
-def get_suscripcion_anuncio(id_sa: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM SUSCRIPCIONES_ANUNCIOS WHERE id_SA = %s;", (id_sa,))
-        sa = cur.fetchone()
-        cur.close()
-        conn.close()
-        if sa is None:
-            raise HTTPException(
-                status_code=404, detail="Relación suscripción-anuncio no encontrada")
-        return sa
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/suscripciones_anuncios")
-def create_suscripcion_anuncio(sa: SuscripcionAnuncio):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            INSERT INTO SUSCRIPCIONES_ANUNCIOS (id_SA, id_suscripciones, id_anuncios, num_veces_mostrado)
-            VALUES (%s, %s, %s, %s);
-        """
-        values = (
-            sa.id_SA,
-            sa.id_suscripciones,
-            sa.id_anuncios,
-            sa.num_veces_mostrado
-        )
-        cur.execute(sql, values)
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Relación suscripción-anuncio creada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.put("/suscripciones_anuncios/{id_sa}")
-def update_suscripcion_anuncio(id_sa: int, sa: SuscripcionAnuncio):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        sql = """
-            UPDATE SUSCRIPCIONES_ANUNCIOS
-            SET id_suscripciones = %s, id_anuncios = %s, num_veces_mostrado = %s
-            WHERE id_SA = %s;
-        """
-        values = (
-            sa.id_suscripciones,
-            sa.id_anuncios,
-            sa.num_veces_mostrado,
-            id_sa
-        )
-        cur.execute(sql, values)
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Relación suscripción-anuncio no encontrada")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Relación suscripción-anuncio actualizada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.delete("/suscripciones_anuncios/{id_sa}")
-def delete_suscripcion_anuncio(id_sa: int):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "DELETE FROM SUSCRIPCIONES_ANUNCIOS WHERE id_SA = %s;", (id_sa,))
-        if cur.rowcount == 0:
-            raise HTTPException(
-                status_code=404, detail="Relación suscripción-anuncio no encontrada")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": "Relación suscripción-anuncio eliminada correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))

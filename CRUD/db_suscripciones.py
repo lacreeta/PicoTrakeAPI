@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from db import get_connection
-from models import Suscripcion, SuscriptionUpdate
+from model.models import Suscripcion, SuscriptionUpdate
 
 
 def readAll():

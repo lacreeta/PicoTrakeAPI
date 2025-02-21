@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from db import get_connection
-from models import *
+from model.models import *
 from passlib.context import CryptContext
 from auth import *
 from psycopg2.extras import RealDictRow

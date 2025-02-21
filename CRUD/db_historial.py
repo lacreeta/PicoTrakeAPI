@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from db import get_connection
-from models import HistorialActividad, Usuario, Ruta
+from model.models import HistorialActividad, Usuario, Ruta
 from datetime import datetime, timedelta
 
 def getAll(id_usuario: int):
@@ -93,5 +93,36 @@ def create(historial: HistorialActividad):
         if conn:
             conn.close()
 
+def deleteAll(id_usuario: int):
+     try:
+          conn =  get_connection()
+          with conn.cursor() as cur:
+               cur.execute(""" delete from historial_actividades where id_usuarios = %s""", (id_usuario,))
+               if cur.rowcount == 0:
+                    raise HTTPException(
+                    status_code=404, detail="No hay historial para borrar.")
+               conn.commit()
+     except Exception as e:
+          raise HTTPException(status_code=400, detail=f"Error al eliminar el historial: {e}")
+     finally:
+          if conn:
+               conn.close()
 
-
+def deleteByRoute(id_usuario: int, nombre_ruta:str):
+     try:
+          conn = get_connection()
+          with conn.cursor() as cur:
+               cur.execute(""" 
+                           delete from historial_actividades h 
+                           join rutas r on h.id_ruta = r.id_ruta
+                           where h.id_usuarios = %s and r.nombre_ruta = %s
+                            """, (id_usuario, nombre_ruta))
+               if cur.rowcount == 0:
+                    raise HTTPException(
+                    status_code=404, detail=f"No hay historial de la ruta: {nombre_ruta} para borrar.")
+               conn.commit()
+     except Exception as e:
+          raise HTTPException(status_code=400, detail=f"Error al eliminar el historial: {e}")
+     finally:
+          if conn:
+               conn.close()

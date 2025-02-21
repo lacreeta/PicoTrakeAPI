@@ -33,10 +33,14 @@ class HistorialActividad(BaseModel):
 
 
 class Anuncio(BaseModel):
-    id_anuncios: int
     titulo: Optional[str] = None
     contenido: Optional[str] = None
-    id_suscripciones: int
+    tipo_usuario: Optional[str] = None  # "nuevo" o "ex-premium"
+    fecha_inicio: Optional[date] = None
+    fecha_fin: Optional[date] = None
+    activo: Optional[bool] = True
+    id_suscripciones: Optional[int] = None
+
 
 
 class SuscripcionAnuncio(BaseModel):
