@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from db import get_connection
-from model.models import HistorialActividad, Usuario, Ruta
+from model.models import HistorialActividad
 from datetime import datetime, timedelta
 
 def getAll(id_usuario: int):
