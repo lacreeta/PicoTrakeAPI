@@ -11,7 +11,6 @@ from fastapi import HTTPException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
 def readAll():
     conn = None
     try:
@@ -25,7 +24,6 @@ def readAll():
     finally:
         if conn:
             conn.close()
-
 
 def readById(id_usuarios: int):
     conn = None
@@ -41,7 +39,6 @@ def readById(id_usuarios: int):
     finally:
         if conn:
             conn.close()
-
 
 def create(usuario: UsuarioCreate):
     conn = None
@@ -70,7 +67,6 @@ def create(usuario: UsuarioCreate):
                     new_id = resultado["id_usuarios"]
                 else:
                     raise HTTPException(status_code=400, detail="Error: El email ya está registrado.")
-
         conn.commit()
         return {"message": "Usuario creado correctamente", "id_usuarios": new_id}
     except Exception as e:
@@ -83,26 +79,20 @@ def update(id_usuario: int, data: dict):
     conn = None
     try:
         campos_permitidos = {"nombre", "apellido", "email"}
-        data_filtrada = {k: v for k,
-                         v in data.items() if k in campos_permitidos}
-
+        data_filtrada = {k: v for k, v in data.items() if k in campos_permitidos}
         if not data_filtrada:
             raise HTTPException(
                 status_code=400, detail="No se proporcionaron datos válidos para actualizar.")
-
         conn = get_connection()
         with conn.cursor() as cur:
             set_clause = ', '.join(
                 [f"{key} = %s" for key in data_filtrada.keys()])
             values = tuple(data_filtrada.values()) + (id_usuario,)
-
             query = f"UPDATE usuarios SET {set_clause} WHERE id_usuarios = %s"
             cur.execute(query, values)
-
             if cur.rowcount == 0:
                 raise HTTPException(
                     status_code=404, detail="Usuario no encontrado")
-
         conn.commit()
         return {"message": "Usuario actualizado correctamente"}
     except Exception as e:
@@ -110,7 +100,6 @@ def update(id_usuario: int, data: dict):
     finally:
         if conn:
             conn.close()
-
 
 def update_password_db(id_usuario: int, contrasena_actual: str, nueva_contrasena: str):
     conn = None
@@ -128,19 +117,15 @@ def update_password_db(id_usuario: int, contrasena_actual: str, nueva_contrasena
                 raise HTTPException(
                     status_code=500, detail="Error: No se devolvió ningún ID tras el cambio.")
             contrasena_hash = resultado["contrasena"]
-
             if not pwd_context.verify(contrasena_actual, contrasena_hash):
                 raise HTTPException(
                     status_code=401, detail="La contrasena actual es incorrecta")
-
             nueva_contrasena_hash = pwd_context.hash(nueva_contrasena)
-
             cur.execute("UPDATE usuarios SET contrasena = %s WHERE id_usuarios = %s",
                         (nueva_contrasena_hash, id_usuario))
             if cur.rowcount == 0:
                 raise HTTPException(
                     status_code=404, detail="Usuario no encontrado")
-
         conn.commit()
         return {"message": "contrasena actualizada correctamente"}
     except Exception as e:
@@ -150,7 +135,6 @@ def update_password_db(id_usuario: int, contrasena_actual: str, nueva_contrasena
     finally:
         if conn:
             conn.close()
-
 
 def login(login_data: LoginRequest) -> dict:
     conn = None
@@ -201,7 +185,6 @@ def delete(id_usuario: int, contrasena: str):
             if not pwd_context.verify(contrasena, contrasena_hash):
                 raise HTTPException(
                     status_code=401, detail="La contrasena actual es incorrecta")
-
             cur.execute(
                 "delete from usuarios where id_usuarios = %s", (id_usuario,))
             print(cur.rowcount)
@@ -225,11 +208,9 @@ def update_suscription(id_usuario: int, suscripcion_data: UpdateSuscriptionUserM
             resultado = cur.fetchone()
             if resultado is None: 
                 raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
             duracion = suscripcion_data.duracion
             if duracion not in [1, 12]:
                 raise HTTPException(status_code=400, detail="Duración de suscripción no válida. Solo se permite 1 mes o 12 meses.")
-           
             fecha_inicio = date.today()
             fecha_final = fecha_inicio + relativedelta(months=duracion)
             cur.execute("update usuarios set id_suscripciones =%s, fecha_inicio_suscripcion =%s, fecha_final_suscripcion =%s where id_usuarios = %s", 

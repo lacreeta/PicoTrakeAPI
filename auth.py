@@ -35,7 +35,6 @@ def verificar_token(token: str) -> dict:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError as e:
-        print("🔹 Error al decodificar el token:", e)  # DEBUG
         raise HTTPException(
             status_code=401, detail="Token inválido o expirado")
 
@@ -45,15 +44,12 @@ def obtener_usuario_actual(token: str = Security(oauth2_scheme)) -> dict:
     Dependencia de FastAPI que extrae el id_usuario del token JWT.
     Se espera que el token incluya el campo "sub" con el id_usuario.
     """
-    print(f"🔹 Token recibido en obtener_usuario_actual: {token}")  # DEBUG
     payload = verificar_token(token)
     id_usuario = payload.get("sub")
-    print(f"🔹 ID usuario obtenido del token (antes de convertir): {id_usuario}")  # DEBUG
     if id_usuario is None:
         raise HTTPException(status_code=401, detail="Token inválido")
     try:
         id_usuario = int(id_usuario)  # 🔹 Convertir a entero
-        print(f"🔹 ID usuario convertido a int: {id_usuario}")  # DEBUG
     except ValueError:
         raise HTTPException(status_code=401, detail="Token inválido: ID de usuario no es un número")
     return {"id_usuario": id_usuario}
