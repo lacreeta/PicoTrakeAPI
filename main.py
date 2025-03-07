@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from CRUD import db_anuncios, db_usuario, db_historial, db_suscripciones, db_rutas
 from model.models import *
 from db import get_connection
@@ -39,6 +40,15 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi 
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
