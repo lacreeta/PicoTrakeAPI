@@ -7,8 +7,8 @@ def get_connection():
         conn = psycopg2.connect(
             host="localhost",
             port=5432,
-            dbname="bbdd_projecte",      
-            user="postgres",
+            dbname="picotrake",      
+            user="andres",
             password="1234",
             cursor_factory=RealDictCursor
         )
