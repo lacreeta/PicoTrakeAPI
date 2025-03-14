@@ -4,11 +4,19 @@ from psycopg2.extras import RealDictCursor
 
 def get_connection():
     try:
-         conn = psycopg2.connect(
+         """conn = psycopg2.connect(
              host="localhost",
              port=5432,
              dbname="bbdd_projecte",      
              user="postgres",
+             password="1234",
+             cursor_factory=RealDictCursor
+         )"""
+         conn = psycopg2.connect(
+             host="localhost",
+             port=5432,
+             dbname="picotrake",      
+             user="andres",
              password="1234",
              cursor_factory=RealDictCursor
          )
