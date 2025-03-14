@@ -8,6 +8,7 @@ from typing import cast
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
+import smtplib
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -36,6 +37,20 @@ def readById(id_usuarios: int):
         return usuario
     except Exception as e:
         return {"status": -1, "message": f"Error de conexión{e}"}
+    finally:
+        if conn:
+            conn.close()
+
+def getByEmail(email:str):
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("select * from usuarios where email = %s", (email,))
+            usuario = cur.fetchone()
+            return usuario
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al consultar el usuario: {e}")
     finally:
         if conn:
             conn.close()
@@ -101,6 +116,7 @@ def update(id_usuario: int, data: dict):
         if conn:
             conn.close()
 
+# el usuario debe hacer login
 def update_password_db(id_usuario: int, contrasena_actual: str, nueva_contrasena: str):
     conn = None
     try:
@@ -132,6 +148,20 @@ def update_password_db(id_usuario: int, contrasena_actual: str, nueva_contrasena
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()
+
+def reset_password(user_id: int, nueva_contrasena: str):
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            nueva_contrasena_hash = pwd_context.hash(nueva_contrasena)
+            cur.execute("UPDATE usuarios SET contrasena = %s where id_usuarios = %s", (nueva_contrasena_hash, user_id))
+            conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al actualizar la contraseña: {e}")
     finally:
         if conn:
             conn.close()
@@ -204,7 +234,7 @@ def update_suscription(id_usuario: int, suscripcion_data: UpdateSuscriptionUserM
     try: 
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("select from usuarios where id_usuarios = %s", (id_usuario,))
+            cur.execute("select * from usuarios where id_usuarios = %s", (id_usuario,))
             resultado = cur.fetchone()
             if resultado is None: 
                 raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -225,3 +255,4 @@ def update_suscription(id_usuario: int, suscripcion_data: UpdateSuscriptionUserM
     finally: 
         if conn:
             conn.close()
+

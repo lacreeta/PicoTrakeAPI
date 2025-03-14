@@ -88,3 +88,11 @@ class UpdateSuscriptionUserModel(BaseModel):
 class SuscriptionUpdate(BaseModel):
     tipo: str
     precio: float
+
+# Modelo para la solicitud de reset
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    
+# Modelo para el reset de contraseña
+class ResetPasswordRequest(BaseModel):
+    nueva_contrasena: str

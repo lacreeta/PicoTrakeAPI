@@ -11,7 +11,6 @@ from fastapi.openapi.utils import get_openapi
 app = FastAPI(debug=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-
 # Modificar Swagger para que solo pida el token JWT al autenticarse
 def custom_openapi():
     if app.openapi_schema:
@@ -49,7 +48,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/")
 def read_root():
@@ -107,10 +105,14 @@ def get_usuario(id_usuario: int):
         )
     return usuario
 
+@app.get("/usuarios/{email:str}")
+def get_usuarioByEmail(email:str):
+    usuario = db_usuario.getByEmail(email)
+    return usuario
+    
 @app.post("/usuarios")
 async def create_usuario(usuario: UsuarioCreate):
     return db_usuario.create(usuario)
-
 
 @app.put("/usuarios/update")
 def update_usuario(
@@ -120,7 +122,6 @@ def update_usuario(
     data_filtrada = data.model_dump(exclude_unset=True)
     return db_usuario.update(usuario["id_usuario"], data_filtrada)
 
-
 @app.put("/usuarios/update/password")
 def update_password_user(
     datos: UpdatePasswordRequest,
@@ -128,6 +129,14 @@ def update_password_user(
 ):
     id_usuario = usuario["id_usuario"]
     return db_usuario.update_password_db(id_usuario, datos.contrasena_actual, datos.nueva_contrasena)
+
+@app.put("/usuarios/reset/password")
+def reset_password(
+    datos: ResetPasswordRequest,
+    usuario: dict = Depends(obtener_usuario_actual)
+):
+    id_usuario = usuario["id_usuario"]
+    return db_usuario.reset_password(id_usuario, datos.nueva_contrasena)
 
 @app.post("/login")
 def login_user(login_data: LoginRequest):
@@ -174,7 +183,6 @@ def update_ruta(nombre_ruta: str, ruta: Ruta):
 @app.delete("/rutas/{nombre_ruta:str}")
 def delete_ruta(nombre_ruta:str):
     return db_rutas.delete(nombre_ruta)
-    
 
 # ----- Endpoints para HISTORIAL DE ACTIVIDADES -----
 
@@ -197,7 +205,6 @@ def get_historial_by_date(fecha_inicio: str, fecha_final: str,
 @app.put("/historial/")
 def create_historial(historial: HistorialActividad):
     return db_historial.create(historial)
-
 
 @app.delete("/usuario/historial")
 def delete_historial(usuario: dict = Depends(obtener_usuario_actual)):
@@ -225,6 +232,3 @@ def create_anuncio(anuncio: Anuncio):
 @app.delete("/anuncios/{id_anuncio}")
 def delete_anuncio(id_anuncio: int):
     return db_anuncios.delete(id_anuncio)
-
-# ----- Endpoints para SUSCRIPCIONES_ANUNCIOS -----
-
