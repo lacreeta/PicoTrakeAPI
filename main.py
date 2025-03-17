@@ -12,7 +12,7 @@ from sqlmodel import SQLModel, create_engine
 app = FastAPI(debug=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-DATABASE_URL = "postgresql://andres:1234@localhost/picotrake"  
+DATABASE_URL = "postgresql+psycopg://andres:1234@localhost/picotrake"
 engine = create_engine(DATABASE_URL, echo=True)
 
 # Modificar Swagger para que solo pida el token JWT al autenticarse
