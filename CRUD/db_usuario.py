@@ -3,12 +3,11 @@ from db import get_connection
 from model.models import *
 from passlib.context import CryptContext
 from auth import *
-from psycopg2.extras import RealDictRow
 from typing import cast
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
-import smtplib
+from psycopg.rows import dict_row
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -59,14 +58,13 @@ def create(usuario: UsuarioCreate):
     conn = None
     try:
         conn = get_connection()
-        with conn.cursor() as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             if usuario.contrasena is None:
                 raise HTTPException(status_code=400, detail="La contraseña es obligatoria")
             hashed_password = pwd_context.hash(usuario.contrasena)
             fecha_registro = date.today()
             cur.execute("SELECT id_usuarios FROM usuarios WHERE email = %s", (usuario.email,))
             resultado = cur.fetchone()
-            resultado = cast(RealDictRow, resultado)
             if resultado:
                 raise HTTPException(status_code=400, detail="Error: El email ya está registrado.")
             else:
@@ -77,7 +75,6 @@ def create(usuario: UsuarioCreate):
                     RETURNING id_usuarios
                 """, (usuario.nombre, usuario.apellido, usuario.email, hashed_password, fecha_registro))
                 resultado = cur.fetchone()
-                resultado = cast(RealDictRow, resultado)
                 if resultado: 
                     new_id = resultado["id_usuarios"]
                 else:
@@ -104,7 +101,7 @@ def update(id_usuario: int, data: dict):
                 [f"{key} = %s" for key in data_filtrada.keys()])
             values = tuple(data_filtrada.values()) + (id_usuario,)
             query = f"UPDATE usuarios SET {set_clause} WHERE id_usuarios = %s"
-            cur.execute(query, values)
+            cur.execute(query, values) # type: ignore
             if cur.rowcount == 0:
                 raise HTTPException(
                     status_code=404, detail="Usuario no encontrado")
@@ -121,14 +118,13 @@ def update_password_db(id_usuario: int, contrasena_actual: str, nueva_contrasena
     conn = None
     try:
         conn = get_connection()
-        with conn.cursor() as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
                 "SELECT contrasena FROM usuarios WHERE id_usuarios = %s", (id_usuario,))
             resultado = cur.fetchone()
             if resultado is None:
                 raise HTTPException(
                     status_code=404, detail="Usuario no encontrado")
-            resultado = cast(RealDictRow, resultado)
             if resultado is None:
                 raise HTTPException(
                     status_code=500, detail="Error: No se devolvió ningún ID tras el cambio.")
@@ -170,7 +166,7 @@ def login(login_data: LoginRequest) -> dict:
     conn = None
     try:
         conn = get_connection()
-        with conn.cursor() as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
                 "SELECT id_usuarios, contrasena FROM usuarios WHERE email = %s",
                 (login_data.email,)
@@ -179,7 +175,6 @@ def login(login_data: LoginRequest) -> dict:
             if resultado is None:
                 raise HTTPException(
                     status_code=401, detail="Credenciales incorrectas")
-            resultado = cast(RealDictRow, resultado)
             id_usuario = resultado["id_usuarios"]
             contrasena_hash = resultado["contrasena"]
             if not pwd_context.verify(login_data.contrasena, contrasena_hash):
@@ -199,14 +194,13 @@ def delete(id_usuario: int, contrasena: str):
     conn = None
     try:
         conn = get_connection()
-        with conn.cursor() as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
                 "select contrasena from usuarios where id_usuarios = %s", (id_usuario,) )
             resultado = cur.fetchone()
             if resultado is None: 
                 raise HTTPException(
                     status_code=404, detail="Usuario no encontrado")
-            resultado = cast(RealDictRow, resultado)
             if resultado is None:
                 raise HTTPException(
                     status_code=500, detail="Error: No se devolvió ningún ID tras el cambio.")

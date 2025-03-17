@@ -2,14 +2,18 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from CRUD import db_anuncios, db_usuario, db_historial, db_suscripciones, db_rutas
 from model.models import *
-from db import get_connection
+from model.modelsBBDD import *
 from typing import List
 from auth import *
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
+from sqlmodel import SQLModel, create_engine
 
 app = FastAPI(debug=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+DATABASE_URL = "postgresql://andres:1234@localhost/picotrake"  
+engine = create_engine(DATABASE_URL, echo=True)
 
 # Modificar Swagger para que solo pida el token JWT al autenticarse
 def custom_openapi():
@@ -48,6 +52,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
 
 @app.get("/")
 def read_root():

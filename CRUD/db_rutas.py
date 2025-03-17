@@ -1,8 +1,6 @@
-from typing import cast
 from fastapi import HTTPException
 from db import get_connection
 from model.models import Ruta
-from psycopg2.extras import RealDictRow
 
 def readAll():
     conn = None
@@ -73,10 +71,9 @@ def update(nombre_ruta: str, ruta: Ruta):
         with conn.cursor() as cur:
             cur.execute("SELECT id_ruta FROM rutas WHERE nombre_ruta = %s", (nombre_ruta,))
             resultado = cur.fetchone()
-            resultado = cast(RealDictRow, resultado)
             if resultado is None:
                 raise HTTPException(status_code=404, detail="Ruta no encontrada")
-            id_ruta = resultado["id_ruta"] 
+            id_ruta = resultado["id_ruta"]  # type: ignore
 
             data = {k: v for k, v in ruta.model_dump().items() if v is not None}
             
@@ -86,7 +83,7 @@ def update(nombre_ruta: str, ruta: Ruta):
             query = "UPDATE rutas SET " + ", ".join(f"{k} = %s" for k in data.keys()) + " WHERE id_ruta = %s"
             valores = list(data.values()) + [id_ruta] 
 
-            cur.execute(query, valores)
+            cur.execute(query, valores) # type: ignore
 
         conn.commit()
         return {"message": "Ruta actualizada correctamente", "id_ruta": id_ruta}

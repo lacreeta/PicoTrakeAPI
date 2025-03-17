@@ -1,25 +1,25 @@
 from fastapi import HTTPException
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 
 def get_connection():
     try:
-         """conn = psycopg2.connect(
+         """conn = psycopg.connect(
              host="localhost",
              port=5432,
              dbname="bbdd_projecte",      
              user="postgres",
              password="1234",
-             cursor_factory=RealDictCursor
+             row_factory=dict_row # type: ignore
          )"""
-         conn = psycopg2.connect(
+         conn = psycopg.connect(
              host="localhost",
              port=5432,
              dbname="picotrake",      
              user="andres",
              password="1234",
-             cursor_factory=RealDictCursor
+             row_factory=dict_row # type: ignore
          )
          return conn
-    except psycopg2.Error as e:
-        raise HTTPException(status_code=500, detail=f"Error de conexión a la base de datos: {e.pgerror}")
+    except psycopg.Error as e:
+        raise HTTPException(status_code=500, detail=f"Error de conexión a la base de datos: {str(e)}")
