@@ -1,19 +1,24 @@
 services:
   db:
-    image: postgres:14-alpine
     container_name: picotrake_db
+    image: postgres:14-alpine
     env_file:
       - .env.db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
     build: .
     container_name: picotrake_api
     ports:
-      - "8000:8000"
+      - "443:443"
     depends_on:
       - db
     env_file:
