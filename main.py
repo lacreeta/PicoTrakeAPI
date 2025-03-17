@@ -8,12 +8,13 @@ from auth import *
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
 from sqlmodel import SQLModel, create_engine
+import os
 
 app = FastAPI(debug=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-DATABASE_URL = "postgresql+psycopg://admin:1234@3.95.221.51/picotrake"
-engine = create_engine(DATABASE_URL, echo=True)
+DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DATABASE_URL, echo=True) # type: ignore
 
 # Modificar Swagger para que solo pida el token JWT al autenticarse
 def custom_openapi():
