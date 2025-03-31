@@ -43,16 +43,43 @@ def getAnunciosParaUsuario(id_usuario: int):
     finally:
         if conn:
             conn.close()
+            
+def getAnunciosGenericos():
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT * FROM ANUNCIOS 
+                WHERE tipo_usuario = %s 
+                AND (fecha_fin IS NULL OR fecha_fin >= NOW())
+                AND activo = TRUE;
+            """, ("generico",)) 
+            anuncios = cur.fetchall()
+            return anuncios
+    except Exception as e:
+        print(f"Error al obtener anuncios genéricos: {e}")
+        return []
+    finally:
+        if conn:
+            conn.close()
 
 def create(anuncio: Anuncio):
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("""insert into anuncios 
-                        (titulo, contenido, tipo_usuario, 
-                        fecha_inicio, fecha_fin, activo)""",
-                        (anuncio.titulo, anuncio.contenido, anuncio.tipo_usuario,
-                         anuncio.fecha_inicio, anuncio.fecha_fin, anuncio.activo))
+            cur.execute("""
+                INSERT INTO anuncios 
+                (titulo, contenido, tipo_usuario, fecha_inicio, fecha_fin, activo, id_suscripciones)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                anuncio.titulo,
+                anuncio.contenido,
+                anuncio.tipo_usuario,
+                anuncio.fecha_inicio,
+                anuncio.fecha_fin,
+                anuncio.activo,
+                anuncio.id_suscripciones
+            ))  
             if cur.rowcount == 0:
                 raise HTTPException(status_code=400, detail="No se ha podido crear el anuncio.")
             conn.commit()

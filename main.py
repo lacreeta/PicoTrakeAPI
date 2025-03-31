@@ -228,9 +228,13 @@ def delete_historial_by_route(nombre_ruta:str, usuario:dict = Depends(obtener_us
 # ----- Endpoints para ANUNCIOS -----
 
 @app.get("/anuncios")
-def get_anuncios(usuario: dict = Depends(obtener_usuario_actual)):
+def get_anunciosLog(usuario: dict = Depends(obtener_usuario_actual)):
     id_usuario = usuario["id_usuario"]
     return db_anuncios.getAnunciosParaUsuario(id_usuario)
+
+@app.get("/anuncios-publicos")
+def get_anunciosGen():
+    return db_anuncios.getAnunciosGenericos()
 
 # endpoint para desarrolladores
 @app.post("/anuncios")

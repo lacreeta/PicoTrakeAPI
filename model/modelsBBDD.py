@@ -1,6 +1,6 @@
 from datetime import date, time
 from typing import Optional
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, text, CheckConstraint
 
 # Modelo para la tabla SUSCRIPCIONES
 class SuscripcionDB(SQLModel, table=True):
@@ -18,7 +18,7 @@ class UsuarioDB(SQLModel, table=True):
     email: str = Field(..., max_length=150, sa_column_kwargs={"unique": True})
     contrasena: str = Field(..., max_length=150)
     fecha_registro: Optional[date] = Field(default_factory=date.today)
-    id_suscripciones: int = Field(default=1, foreign_key="suscripciones.id_suscripciones")
+    id_suscripciones: int = Field(default=1, foreign_key="suscripciones.id_suscripciones", sa_column_kwargs={"server_default": text("1")})
     fecha_inicio_suscripcion: Optional[date] = Field(default_factory=date.today)
     fecha_final_suscripcion: Optional[date] = None
 
@@ -43,10 +43,13 @@ class HistorialActividadDB(SQLModel, table=True):
 # Modelo para la tabla ANUNCIOS
 class AnuncioDB(SQLModel, table=True):
     __tablename__ = "anuncios"
+    __table_args__ = (
+        CheckConstraint("tipo_usuario IN ('nuevo', 'ex-premium', 'generico')", name="check_tipo_usuario"),
+    )
     id_anuncios: Optional[int] = Field(default=None, primary_key=True)
     titulo: str = Field(..., max_length=100)
     contenido: str = Field(..., max_length=255)
-    tipo_usuario: str = Field(..., max_length=20)  # Se espera 'nuevo' o 'ex-premium'
+    tipo_usuario: str = Field(..., max_length=20)  # Se espera 'nuevo', 'ex-premium' o 'generico'
     fecha_inicio: Optional[date] = Field(default_factory=date.today)
     fecha_fin: Optional[date] = None
     activo: bool = Field(default=True)
