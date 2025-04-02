@@ -173,26 +173,6 @@ Crea un nuevo usuario con los datos proporcionados.
 }
 ```
 
-### Iniciar sesión
-**POST** `/login`
-
-#### Descripción:
-Inicia sesión y devuelve un token JWT.
-
-#### Body esperado:
-```json
-{
-  "email": "andres@example.com",
-  "contrasena": "miPassword123"
-}
-```
-#### Respuesta(`200 OK`):
-```json
-{
-  "access_token": "jwt_token_aquí",
-  "token_type": "bearer"
-}
-```
 ### Actualizar datos del usuario (requiere login)
 **PUT** `/usuarios/update`
 
