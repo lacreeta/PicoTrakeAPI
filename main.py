@@ -64,6 +64,7 @@ def read_root():
 
 # ----- Endpoints para SUSCRIPCIONES -----
 
+# for developers
 @app.get("/suscripciones", response_model=List[Suscripcion])
 def get_suscripciones():
     suscripciones_data = db_suscripciones.readAll()
@@ -81,21 +82,24 @@ def get_suscripcion(id_suscripcion: int):
             status_code=404, detail="No se ha encontrado ninguna suscripción por esta ID")
     return suscripcion
 
+# for developers
 @app.post("/suscripciones")
 async def create_suscripcion(suscripcion: Suscripcion):
     return db_suscripciones.create(suscripcion)
 
+# for developers
 @app.put("/suscripciones/{id_suscripcion}")
 def update_suscripcion(id_suscripcion: int, suscripcion: SuscriptionUpdate):
     return db_suscripciones.update(id_suscripcion, suscripcion)
 
+# for developers
 @app.delete("/suscripciones/{id_suscripcion}")
 def delete_suscripcion(id_suscripcion: int):
     return db_suscripciones.delete(id_suscripcion)
 
 # ----- Endpoints para USUARIOS -----
 
-# no usado por usuarios reales
+# for developers
 @app.get("/usuarios")
 def get_usuarios():
     usuarios_data = db_usuario.readAll()
@@ -104,7 +108,7 @@ def get_usuarios():
             status_code=404, detail="No se ha encontrado ningun usuario")
     return usuarios_data
 
-# no usado por usuarios reales
+# for developers
 @app.get("/usuarios/{id_usuario}")
 def get_usuario(id_usuario: int):
     usuario = db_usuario.readById(id_usuario)
@@ -114,6 +118,7 @@ def get_usuario(id_usuario: int):
         )
     return usuario
 
+# useless for the moment
 @app.get("/usuarios/{email:str}")
 def get_usuarioByEmail(email:str):
     usuario = db_usuario.getByEmail(email)

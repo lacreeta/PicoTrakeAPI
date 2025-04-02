@@ -6,12 +6,10 @@ from fastapi.security import OAuth2PasswordBearer
 import os
 
 # Configuración del JWT
-# En producción, usa variables de entorno para esto
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Tiempo de expiración en minutos
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 
 
-# Esquema de autenticación para Bearer token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 

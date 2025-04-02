@@ -54,6 +54,7 @@ def getByEmail(email:str):
         if conn:
             conn.close()
 
+# pensando en cambiar lógica
 def create(usuario: UsuarioCreate):
     conn = None
     try:
