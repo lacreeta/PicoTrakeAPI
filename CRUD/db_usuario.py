@@ -53,6 +53,20 @@ def getByEmail(email:str):
     finally:
         if conn:
             conn.close()
+            
+def get_user(id_usuario:int):
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("select nombre from usuarios where id_usuarios =%s", (id_usuario,))
+            usuario = cur.fetchone()
+            return usuario
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al consultar el usuario: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 # pensando en cambiar lógica
 def create(usuario: UsuarioCreate):

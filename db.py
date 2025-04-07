@@ -5,14 +5,6 @@ import os
 
 def get_connection():
     try:
-         """conn = psycopg.connect(
-             host="localhost",
-             port=5432,
-             dbname="bbdd_projecte",      
-             user="postgres",
-             password="1234",
-             row_factory=dict_row # type: ignore
-         )"""
          conn = psycopg.connect(
             host=os.getenv("DB_HOST"),
             port=int(os.getenv("DB_PORT")), #type: ignore

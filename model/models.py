@@ -17,7 +17,7 @@ class Usuario(BaseModel):
     contrasena: Optional[str] = Field(None, min_length=6) 
     fecha_registro: Optional[date] = None
     id_suscripciones: Optional[int] = None
-
+    
 
 class Ruta(BaseModel):
     nombre_ruta: Optional[str] = None
@@ -30,24 +30,26 @@ class HistorialActividad(BaseModel):
     id_usuarios: int
     id_ruta: int
     fecha: Optional[date] = None
-
-
-class Anuncio(BaseModel):
-    titulo: Optional[str] = None
-    contenido: Optional[str] = None
-    tipo_usuario: Optional[str] = None  # "nuevo" o "ex-premium"
-    fecha_inicio: Optional[date] = None
-    fecha_fin: Optional[date] = None
-    activo: Optional[bool] = True
-    id_suscripciones: Optional[int] = None
+    
 
 
 
-class SuscripcionAnuncio(BaseModel):
-    id_SA: int
-    id_suscripciones: int
-    id_anuncios: int
-    num_veces_mostrado: int
+# class Anuncio(BaseModel):
+#     titulo: Optional[str] = None
+#     contenido: Optional[str] = None
+#     tipo_usuario: Optional[str] = None  # "nuevo" o "ex-premium"
+#     fecha_inicio: Optional[date] = None
+#     fecha_fin: Optional[date] = None
+#     activo: Optional[bool] = True
+#     id_suscripciones: Optional[int] = None
+
+
+
+# class SuscripcionAnuncio(BaseModel):
+#     id_SA: int
+#     id_suscripciones: int
+#     id_anuncios: int
+#     num_veces_mostrado: int
 
 
  # Seguridad y JWT

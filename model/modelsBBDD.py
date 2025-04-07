@@ -41,16 +41,16 @@ class HistorialActividadDB(SQLModel, table=True):
     fecha: Optional[date] = None
 
 # Modelo para la tabla ANUNCIOS
-class AnuncioDB(SQLModel, table=True):
-    __tablename__ = "anuncios"
-    __table_args__ = (
-        CheckConstraint("tipo_usuario IN ('nuevo', 'ex-premium', 'generico')", name="check_tipo_usuario"),
-    )
-    id_anuncios: Optional[int] = Field(default=None, primary_key=True)
-    titulo: str = Field(..., max_length=100)
-    contenido: str = Field(..., max_length=255)
-    tipo_usuario: str = Field(..., max_length=20)  # Se espera 'nuevo', 'ex-premium' o 'generico'
-    fecha_inicio: Optional[date] = Field(default_factory=date.today)
-    fecha_fin: Optional[date] = None
-    activo: bool = Field(default=True)
-    id_suscripciones: Optional[int] = Field(default=None, foreign_key="suscripciones.id_suscripciones")
+# class AnuncioDB(SQLModel, table=True):
+#     __tablename__ = "anuncios"
+#     __table_args__ = (
+#         CheckConstraint("tipo_usuario IN ('nuevo', 'ex-premium', 'generico')", name="check_tipo_usuario"),
+#     )
+#     id_anuncios: Optional[int] = Field(default=None, primary_key=True)
+#     titulo: str = Field(..., max_length=100)
+#     contenido: str = Field(..., max_length=255)
+#     tipo_usuario: str = Field(..., max_length=20)  # Se espera 'nuevo', 'ex-premium' o 'generico'
+#     fecha_inicio: Optional[date] = Field(default_factory=date.today)
+#     fecha_fin: Optional[date] = None
+#     activo: bool = Field(default=True)
+#     id_suscripciones: Optional[int] = Field(default=None, foreign_key="suscripciones.id_suscripciones")

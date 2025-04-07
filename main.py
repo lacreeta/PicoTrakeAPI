@@ -48,7 +48,7 @@ app.openapi = custom_openapi
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["http://localhost:5173"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -118,6 +118,11 @@ def get_usuario(id_usuario: int):
         )
     return usuario
 
+@app.get("/usuarios/get/me")
+def get_usuario(usuario: dict = Depends(obtener_usuario_actual)): 
+    id_usuario = usuario["id_usuario"]
+    return db_usuario.get_user(id_usuario)
+    
 # useless for the moment
 @app.get("/usuarios/{email:str}")
 def get_usuarioByEmail(email:str):
@@ -232,21 +237,21 @@ def delete_historial_by_route(nombre_ruta:str, usuario:dict = Depends(obtener_us
 
 # ----- Endpoints para ANUNCIOS -----
 
-@app.get("/anuncios")
-def get_anunciosLog(usuario: dict = Depends(obtener_usuario_actual)):
-    id_usuario = usuario["id_usuario"]
-    return db_anuncios.getAnunciosParaUsuario(id_usuario)
+# @app.get("/anuncios")
+# def get_anunciosLog(usuario: dict = Depends(obtener_usuario_actual)):
+#     id_usuario = usuario["id_usuario"]
+#     return db_anuncios.getAnunciosParaUsuario(id_usuario)
 
-@app.get("/anuncios-publicos")
-def get_anunciosGen():
-    return db_anuncios.getAnunciosGenericos()
+# @app.get("/anuncios-publicos")
+# def get_anunciosGen():
+#     return db_anuncios.getAnunciosGenericos()
 
-# endpoint para desarrolladores
-@app.post("/anuncios")
-def create_anuncio(anuncio: Anuncio):
-    return db_anuncios.create(anuncio)
+# # endpoint para desarrolladores
+# @app.post("/anuncios")
+# def create_anuncio(anuncio: Anuncio):
+#     return db_anuncios.create(anuncio)
 
-# endpoint para desarrolladores
-@app.delete("/anuncios/{id_anuncio}")
-def delete_anuncio(id_anuncio: int):
-    return db_anuncios.delete(id_anuncio)
+# # endpoint para desarrolladores
+# @app.delete("/anuncios/{id_anuncio}")
+# def delete_anuncio(id_anuncio: int):
+#     return db_anuncios.delete(id_anuncio)

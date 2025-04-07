@@ -4,15 +4,16 @@ services:
     image: postgres:14-alpine
     env_file:
       - .env.db
-    ports:
-      - "5433:5432"
+    networks:
+      - picotrake-net
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U admin"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   api:
     build: .
@@ -23,5 +24,13 @@ services:
       - db
     env_file:
       - .env.api
+    networks:
+      - picotrake-net
+    restart: unless-stopped 
+
 volumes:
   postgres_data:
+
+networks:
+  picotrake-net:
+    driver: bridge
