@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from CRUD import db_anuncios, db_usuario, db_historial, db_suscripciones, db_rutas
+from CRUD import db_usuario, db_historial, db_suscripciones, db_rutas
 from model.models import *
 from model.modelsBBDD import *
 from typing import List
@@ -234,24 +234,3 @@ def delete_historial(usuario: dict = Depends(obtener_usuario_actual)):
 def delete_historial_by_route(nombre_ruta:str, usuario:dict = Depends(obtener_usuario_actual)):
     id_usuario = usuario["id_usuario"]
     return db_historial.deleteByRoute(id_usuario, nombre_ruta)
-
-# ----- Endpoints para ANUNCIOS -----
-
-# @app.get("/anuncios")
-# def get_anunciosLog(usuario: dict = Depends(obtener_usuario_actual)):
-#     id_usuario = usuario["id_usuario"]
-#     return db_anuncios.getAnunciosParaUsuario(id_usuario)
-
-# @app.get("/anuncios-publicos")
-# def get_anunciosGen():
-#     return db_anuncios.getAnunciosGenericos()
-
-# # endpoint para desarrolladores
-# @app.post("/anuncios")
-# def create_anuncio(anuncio: Anuncio):
-#     return db_anuncios.create(anuncio)
-
-# # endpoint para desarrolladores
-# @app.delete("/anuncios/{id_anuncio}")
-# def delete_anuncio(id_anuncio: int):
-#     return db_anuncios.delete(id_anuncio)

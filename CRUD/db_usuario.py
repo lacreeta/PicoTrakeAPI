@@ -3,7 +3,6 @@ from db import get_connection
 from model.models import *
 from passlib.context import CryptContext
 from auth import *
-from typing import cast
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
