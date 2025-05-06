@@ -7,7 +7,7 @@ def readAll():
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("select nombre_ ruta, dificultad, ubicacion, descripcion from rutas;")
+            cur.execute("select nombre_ruta, dificultad, ubicacion, descripcion from rutas;")
             rutas = cur.fetchall()
         return rutas
     except Exception as e:
@@ -38,7 +38,7 @@ def readByName(nombre: str):
         conn = get_connection()
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT nombre_ruta, dificultad, ubicacion, descripcion FROM rutas where nombre_ruta =%s", (nombre,))
+                "SELECT * FROM rutas where nombre_ruta =%s", (nombre,))
             ruta = cur.fetchone()
             if ruta is None:
                 raise HTTPException(status_code=404, detail="Ruta no encontrada")

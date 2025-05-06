@@ -204,8 +204,15 @@ def get_historial_by_date(
     return db_historial.getByDate(usuario["id_usuario"], fecha_inicio, fecha_final)
 
 @app.put("/historial/", tags=["Historial"])
-def create_historial(historial: HistorialActividad):
-    return db_historial.create(historial)
+def create_historial(
+    historial: HistorialActividadBase,
+    usuario: dict = Depends(obtener_usuario_actual)
+):
+    return db_historial.create(HistorialActividad(
+        id_usuarios=usuario["id_usuario"],
+        id_ruta=historial.id_ruta,
+        fecha=historial.fecha
+    ))
 
 @app.delete("/usuario/historial", tags=["Historial"])
 def delete_historial(usuario: dict = Depends(obtener_usuario_actual)):

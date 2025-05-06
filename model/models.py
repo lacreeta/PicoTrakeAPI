@@ -31,6 +31,10 @@ class HistorialActividad(BaseModel):
     id_ruta: int
     fecha: Optional[date] = None
     
+class HistorialActividadBase(BaseModel):
+    id_ruta: int
+    fecha: Optional[date] = None
+    
 class MountainsPublic(BaseModel):
     nombre_montanya: Optional[str]
     descripcion: Optional[str]
