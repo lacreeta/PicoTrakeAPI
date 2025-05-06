@@ -2,6 +2,7 @@ FROM python:3.10-slim
 
 # Exponer el puerto para HTTPS
 EXPOSE 443
+EXPOSE 80
 
 WORKDIR /app
 
@@ -11,4 +12,6 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "443", "--ssl-keyfile", "/app/ssl/key.pem", "--ssl-certfile", "/app/ssl/cert.pem"]
+COPY start.sh .
+
+CMD ["sh", "start.sh"]

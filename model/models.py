@@ -31,6 +31,14 @@ class HistorialActividad(BaseModel):
     id_ruta: int
     fecha: Optional[date] = None
     
+class MountainsPublic(BaseModel):
+    nombre_montanya: Optional[str]
+    descripcion: Optional[str]
+    dificultad: Optional[str]
+    acampar: bool
+    pernoctar: bool
+    especies_peligrosas: bool
+    
 
 
 
@@ -68,6 +76,13 @@ class DeleteUser(BaseModel):
 
 class UsuarioResponse(BaseModel):
     id_usuarios: int
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    email: Optional[EmailStr] = None
+    fecha_registro: Optional[date] = None
+    id_suscripciones: Optional[int] = None
+
+class PerfilUsuarioResponse(BaseModel):
     nombre: Optional[str] = None
     apellido: Optional[str] = None
     email: Optional[EmailStr] = None

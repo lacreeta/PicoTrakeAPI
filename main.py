@@ -7,7 +7,7 @@ from typing import List
 from contextlib import asynccontextmanager
 import os
 
-from CRUD import db_usuario, db_historial, db_suscripciones, db_rutas
+from CRUD import db_mountain, db_usuario, db_historial, db_suscripciones, db_rutas
 from model.models import *
 from model.modelsBBDD import *
 from auth import *
@@ -123,6 +123,10 @@ def get_usuario(id_usuario: int):
 def get_usuario_me(usuario: dict = Depends(obtener_usuario_actual)):
     return db_usuario.get_user(usuario["id_usuario"])
 
+@app.get("/usuarios/get/meAll", response_model=PerfilUsuarioResponse, tags=["Usuarios"])
+def get_usuario_meAll(usuario: dict = Depends(obtener_usuario_actual)):
+    return db_usuario.readById(usuario["id_usuario"])
+
 @app.get("/usuarios/{email:str}", tags=["Usuarios"])
 def get_usuarioByEmail(email: str):
     return db_usuario.getByEmail(email)
@@ -210,3 +214,7 @@ def delete_historial(usuario: dict = Depends(obtener_usuario_actual)):
 @app.delete("/usuario/historial/{nombre_ruta:str}", tags=["Historial"])
 def delete_historial_by_route(nombre_ruta: str, usuario: dict = Depends(obtener_usuario_actual)):
     return db_historial.deleteByRoute(usuario["id_usuario"], nombre_ruta)
+
+@app.get("/mountains/", tags=["Montañas"])
+def get_mountain(nombre_montanya: str):
+    return db_mountain.readByName(nombre_montanya)

@@ -1,4 +1,5 @@
 from datetime import date, time
+from email.policy import default
 from typing import Optional
 from sqlmodel import SQLModel, Field, text
 
@@ -39,3 +40,14 @@ class HistorialActividadDB(SQLModel, table=True):
     id_usuarios: int = Field(foreign_key="usuarios.id_usuarios")
     id_ruta: int = Field(foreign_key="rutas.id_ruta")
     fecha: Optional[date] = None
+    
+class Mountains(SQLModel, table=True):
+    __tablename__ = "montanyas"
+    id_montanya: Optional[int] = Field(default=None, primary_key=True)
+    nombre_montanya: Optional[str] = Field(default=None, max_length=100)
+    descripcion: Optional[str] = Field(default=None, max_length=255)
+    dificultad: Optional[str] = Field(default=None, max_length=50)
+    acampar: bool = Field(default=True)
+    pernoctar: bool = Field(default=True)
+    especies_peligrosas: bool = Field(default=True)
+    
