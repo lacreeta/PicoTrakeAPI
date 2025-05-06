@@ -103,6 +103,7 @@ def deleteAll(id_usuario: int):
                     raise HTTPException(
                     status_code=404, detail="No hay historial para borrar.")
                conn.commit()
+          return {"message": "Historial borrado correctamente"}
      except Exception as e:
           raise HTTPException(status_code=400, detail=f"Error al eliminar el historial: {e}")
      finally:

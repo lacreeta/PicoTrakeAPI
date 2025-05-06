@@ -32,6 +32,7 @@ class RutaDB(SQLModel, table=True):
     ubicacion: Optional[str] = Field(default=None, max_length=150)
     descripcion: Optional[str] = Field(default=None, max_length=255)
     duracion: Optional[time] = None
+    geojson_path: Optional[str] = Field(default=None, max_length=255) 
 
 # Modelo para la tabla HISTORIAL DE ACTIVIDADES
 class HistorialActividadDB(SQLModel, table=True):

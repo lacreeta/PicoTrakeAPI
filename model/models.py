@@ -24,6 +24,7 @@ class Ruta(BaseModel):
     dificultad: Optional[str] = None
     ubicacion: Optional[str] = None
     descripcion: Optional[str] = None
+    geojson_path: Optional[str]
 
 
 class HistorialActividad(BaseModel):

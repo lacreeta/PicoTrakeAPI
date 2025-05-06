@@ -99,10 +99,11 @@ def delete(nombre_ruta:str):
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute(""" delete from rutas where nombre_ruta = %s""",(nombre_ruta))
+            cur.execute(""" delete from rutas where nombre_ruta = %s""",(nombre_ruta,))
             if cur.rowcount == 0:
                 raise HTTPException(status_code=400, detail=f"No se ha encontrado la ruta: {nombre_ruta}")
             conn.commit()
+        return {"message": "Ruta borrada correctamente"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al eliminar la ruta: {e}")
     finally:
