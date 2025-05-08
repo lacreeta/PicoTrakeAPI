@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, Dict, Any
 from datetime import date
 
 
@@ -24,7 +24,7 @@ class Ruta(BaseModel):
     dificultad: Optional[str] = None
     ubicacion: Optional[str] = None
     descripcion: Optional[str] = None
-    geojson_path: Optional[str]
+    geojson: Optional[Dict[str, Any]] = None
 
 
 class HistorialActividad(BaseModel):

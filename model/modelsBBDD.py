@@ -1,7 +1,6 @@
 from datetime import date, time
-from email.policy import default
 from typing import Optional
-from sqlmodel import SQLModel, Field, text
+from sqlmodel import SQLModel, Field, text, JSON, Column
 
 # Modelo para la tabla SUSCRIPCIONES
 class SuscripcionDB(SQLModel, table=True):
@@ -32,7 +31,7 @@ class RutaDB(SQLModel, table=True):
     ubicacion: Optional[str] = Field(default=None, max_length=150)
     descripcion: Optional[str] = Field(default=None, max_length=255)
     duracion: Optional[time] = None
-    geojson_path: Optional[str] = Field(default=None, max_length=255) 
+    geojson: Optional[dict] = Field(sa_column=Column(JSON))
 
 # Modelo para la tabla HISTORIAL DE ACTIVIDADES
 class HistorialActividadDB(SQLModel, table=True):

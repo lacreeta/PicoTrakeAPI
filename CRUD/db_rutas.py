@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from db import get_connection
 from model.models import Ruta
+import json
 
 def readAll():
     conn = None
@@ -54,8 +55,16 @@ def create(ruta: Ruta):
     try:
         conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("insert into rutas (nombre_ruta, dificultad, ubicacion, descripcion) VALUES (%s, %s, %s, %s)",
-                        (ruta.nombre_ruta, ruta.dificultad, ruta.ubicacion, ruta.descripcion))
+            cur.execute("""
+                INSERT INTO rutas (nombre_ruta, dificultad, ubicacion, descripcion, geojson)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
+                ruta.nombre_ruta,
+                ruta.dificultad,
+                ruta.ubicacion,
+                ruta.descripcion,
+                json.dumps(ruta.geojson)  
+            ))
         conn.commit()
         return {"message": "Ruta creada correctamente"}
     except Exception as e:
