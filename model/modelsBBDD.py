@@ -50,4 +50,5 @@ class Mountains(SQLModel, table=True):
     acampar: bool = Field(default=True)
     pernoctar: bool = Field(default=True)
     especies_peligrosas: bool = Field(default=True)
+    geojson: Optional[dict] = Field(sa_column=Column(JSON))
     

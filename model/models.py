@@ -43,6 +43,7 @@ class MountainsPublic(BaseModel):
     acampar: bool
     pernoctar: bool
     especies_peligrosas: bool
+    geojson: Optional[Dict[str, Any]] = None
     
 
 

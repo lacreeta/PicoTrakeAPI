@@ -222,6 +222,16 @@ def delete_historial(usuario: dict = Depends(obtener_usuario_actual)):
 def delete_historial_by_route(nombre_ruta: str, usuario: dict = Depends(obtener_usuario_actual)):
     return db_historial.deleteByRoute(usuario["id_usuario"], nombre_ruta)
 
+# ----- MONTAÑAS -----
+
 @app.get("/mountains/", tags=["Montañas"])
-def get_mountain(nombre_montanya: str):
+def get_mountains():
+    return db_mountain.readAll()
+
+@app.get("/mountains/{nombre_montanya:str}", tags=["Montañas"])
+def get_mountain_by_name(nombre_montanya: str):
     return db_mountain.readByName(nombre_montanya)
+
+@app.post("/montanyas", tags=["Montañas"])
+def create_mountain(montanya: MountainsPublic):
+    return db_mountain.insert_montanya(montanya)
