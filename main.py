@@ -6,6 +6,7 @@ from sqlmodel import SQLModel, create_engine
 from typing import List
 from contextlib import asynccontextmanager
 import os
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from CRUD import db_mountain, db_usuario, db_historial, db_suscripciones, db_rutas
 from model.models import *
@@ -70,6 +71,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# nginx
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["api.picotrakeclub.tech", "localhost", "127.0.0.1"]
 )
 
 # Root
