@@ -38,6 +38,26 @@ def readById(id_usuarios: int):
     finally:
         if conn:
             conn.close()
+            
+def getSuscription(id_user: int):
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                select s.tipo from usuarios u join suscripciones s 
+                on u.id_suscripciones = s.id_suscripciones where u.id_usuarios = %s
+                """, (id_user,))
+            result = cur.fetchone()
+            if result:
+                return {"tipo_suscripcion": result["tipo"]}
+            else:
+                raise HTTPException(status_code=404, detail="Usuario o suscripción no encontrada")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener la suscripción: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 def getByEmail(email:str):
     conn = None

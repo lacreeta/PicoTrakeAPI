@@ -156,6 +156,11 @@ def update_suscription_user(datos: UpdateSuscriptionUserModel, usuario: dict = D
 def delete_usuario(datos: DeleteUser, usuario: dict = Depends(obtener_usuario_actual)):
     return db_usuario.delete(usuario["id_usuario"], datos.contrasena)
 
+@app.get("/usuario/suscription/", tags=["Usuarios"])
+def get_user_suscription(usuario: dict =  Depends(obtener_usuario_actual)):
+    return db_usuario.getSuscription(usuario["id_usuario"])
+    
+    
 # Login
 @app.post("/login", tags=["Usuarios"])
 def login_user(login_data: LoginRequest):
