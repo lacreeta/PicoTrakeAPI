@@ -50,13 +50,13 @@ def create(suscripcion: Suscripcion):
             conn.close()
 
 
-def update(id_sucripcion: int, suscripcion: SuscriptionUpdate):
+def update(id_suscripcion: int, suscripcion: SuscriptionUpdate):
     conn = None
     try:
         conn = get_connection()
         with conn.cursor() as cur:
             cur.execute("update suscripciones set tipo = %s, precio = %s WHERE id_suscripciones = %s",
-                        (suscripcion.tipo, suscripcion.precio, id_sucripcion))
+                        (suscripcion.tipo, suscripcion.precio, id_suscripcion))
             if cur.rowcount == 0:
                 raise HTTPException(
                     status_code=404, detail="Suscripción no encontrada")

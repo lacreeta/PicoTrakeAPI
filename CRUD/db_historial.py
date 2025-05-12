@@ -114,11 +114,12 @@ def deleteByRoute(id_usuario: int, nombre_ruta:str):
      try:
           conn = get_connection()
           with conn.cursor() as cur:
-               cur.execute(""" 
-                           delete from historial_actividades h 
-                           join rutas r on h.id_ruta = r.id_ruta
-                           where h.id_usuarios = %s and r.nombre_ruta = %s
-                            """, (id_usuario, nombre_ruta))
+               cur.execute("""
+                    DELETE FROM historial_actividades
+                    WHERE id_usuarios = %s AND id_ruta IN (
+                    SELECT id_ruta FROM rutas WHERE nombre_ruta = %s
+                    )
+                    """, (id_usuario, nombre_ruta))
                if cur.rowcount == 0:
                     raise HTTPException(
                     status_code=404, detail=f"No hay historial de la ruta: {nombre_ruta} para borrar.")

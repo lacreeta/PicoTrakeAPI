@@ -149,6 +149,31 @@ Devuelve la información de un usuario por su ID.
 }
 ```
 
+### Obtener todos los campos del usuario (requiere login)
+
+**GET**  `/usuarios/get/meAll/`
+
+#### Descripción:
+Devuelve toda la información de un usuario por su ID
+
+```json
+{
+  "nombre": "Andrés",
+  "apellido": "González",
+  "email": "andreu@gmail.com",
+  "fecha_registro": "2025-05-08",
+  "id_suscripciones": 1
+}
+```
+
+### Obtener nombre del usuario (requiere login)
+**GET**  `/usuarios/get/me`
+```json
+{
+  "nombre": "Andrés"
+}
+```
+
 ### Crear un nuevo usuario
 
 **POST** `/usuarios`
@@ -280,8 +305,13 @@ Elimina la cuenta del usuario autenticado. Se requiere contraseña actual para c
 #### Respuesta (`200 OK`):
 ```json
 [
-  ["Ruta del Sol", "Fácil", "Barcelona", "Bonita ruta al amanecer"],
-  ["Caminito Verde", "Media", "Madrid", "Ruta entre árboles y lagos"]
+  {
+    "nombre_ruta": "Camí de Ronda de S’Agaró",
+    "dificultad": "Fácil",
+    "ubicacion": "S’Agaró, Costa Brava",
+    "descripcion": "Ruta costera muy accesible con vistas espectaculares entre S’Agaró y la Platja de Sant Pol."
+  },
+  ...
 ]
 ```
 ### Obtener ruta por id
@@ -294,10 +324,33 @@ Devuelve una ruta por su ID.
 ```json
 {
   "id_ruta": 1,
-  "nombre_ruta": "Ruta del Sol",
+  "nombre_ruta": "Camí de Ronda de S’Agaró",
   "dificultad": "Fácil",
-  "ubicacion": "Barcelona",
-  "descripcion": "Bonita ruta al amanecer"
+  "ubicacion": "S’Agaró, Costa Brava",
+  "descripcion": "Ruta costera muy accesible con vistas espectaculares entre S’Agaró y la Platja de Sant Pol.",
+  "duracion": null,
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": [
+            [
+              [lon, lat, elev], // Punto 1
+              [lon, lat, elev], // Punto 2
+              ...
+            ]
+          ]
+        },
+        "properties": {
+          "name": "Nombre de la ruta",
+          "desc": "Descripción u observaciones"
+        }
+      }
+    ]
+  }
 }
 ```
 ### Obtener ruta por nombre de ruta
@@ -308,11 +361,36 @@ Devuelve una ruta por su nombre.
 
 #### Respuesta (`200 OK`):
 ```json
+```json
 {
-  "nombre_ruta": "Ruta del Sol",
+  "id_ruta": 1,
+  "nombre_ruta": "Camí de Ronda de S’Agaró",
   "dificultad": "Fácil",
-  "ubicacion": "Barcelona",
-  "descripcion": "Bonita ruta al amanecer"
+  "ubicacion": "S’Agaró, Costa Brava",
+  "descripcion": "Ruta costera muy accesible con vistas espectaculares entre S’Agaró y la Platja de Sant Pol.",
+  "duracion": null,
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": [
+            [
+              [lon, lat, elev], // Punto 1
+              [lon, lat, elev], // Punto 2
+              ...
+            ]
+          ]
+        },
+        "properties": {
+          "name": "Nombre de la ruta",
+          "desc": "Descripción u observaciones"
+        }
+      }
+    ]
+  }
 }
 ```
 ### Crea una nueva ruta
@@ -323,10 +401,12 @@ Crea una nueva ruta.
 #### Body esperado:
 ```json
 {
-  "nombre_ruta": "Ruta del Sol",
-  "dificultad": "Fácil",
-  "ubicacion": "Barcelona",
-  "descripcion": "Bonita ruta al amanecer"
+  "nombre_ruta": "string",
+  "dificultad": "string",
+  "ubicacion": "string",
+  "descripcion": "string",
+  "geojson": {
+  }
 }
 ```
 #### Respuesta (`200 OK`):
@@ -343,8 +423,12 @@ Actualiza los datos de una ruta existente por nombre.
 #### Body esperado (puedes actualizar uno o varios campos):
 ```json
 {
-  "dificultad": "Difícil",
-  "descripcion": "Ruta con subidas exigentes"
+  "nombre_ruta": "string",
+  "dificultad": "string",
+  "ubicacion": "string",
+  "descripcion": "string",
+  "geojson": {
+  }
 }
 ```
 #### Respuesta (`200 OK`):
@@ -373,8 +457,16 @@ Devuelve todo el historial de rutas del usuario autenticado.
 #### Respuesta (`200 OK`):
 ```json
 [
-  [1, "Ruta del Sol", "2025-03-20"],
-  [3, "Caminito Verde", "2025-03-18"]
+  {
+    "id_ruta": 2,
+    "nombre_ruta": "Sant Jeroni - Montserrat",
+    "fecha": "2025-05-12"
+  },
+  {
+    "id_ruta": 11,
+    "nombre_ruta": "linea",
+    "fecha": "2025-05-08"
+  }
 ]
 ```
 ### Obtiene el historial del usuario en una ruta (requiere login)
@@ -388,8 +480,11 @@ Devuelve el historial del usuario para una ruta específica.
 #### Respuesta (`200 OK`):
 ```json
 [
-  [1, "Ruta del Sol", "2025-03-20"],
-  [1, "Ruta del Sol", "2025-02-10"]
+  {
+    "id_ruta": 11,
+    "nombre_ruta": "linea",
+    "fecha": "2025-05-08"
+  }
 ]
 ```
 ### Filtrar por fechas (requiere login)
@@ -407,11 +502,19 @@ Filtra el historial del usuario por rango de fechas.
 #### Respuesta (`200 OK`):
 ```json
 [
-  [3, "Caminito Verde", "2025-03-18"],
-  [5, "Montaña Sagrada", "2025-03-12"]
+  {
+    "id_ruta": 2,
+    "nombre_ruta": "Sant Jeroni - Montserrat",
+    "fecha": "2025-05-12"
+  },
+  {
+    "id_ruta": 11,
+    "nombre_ruta": "linea",
+    "fecha": "2025-05-08"
+  }
 ]
 ```
-### Crea un historial
+### Crea un historial (requiere login)
 **PUT** `/historial/`
 #### Descripción: 
 Crea una nueva entrada de historial para un usuario y ruta.
@@ -420,9 +523,8 @@ Crea una nueva entrada de historial para un usuario y ruta.
 
 ```json
 {
-  "id_usuarios": 4,
-  "id_ruta": 3,
-  "fecha": "2025-04-02"
+  "id_ruta": 0,
+  "fecha": "2025-05-12"
 }
 ```
 #### Respuesta (`200 OK`):
@@ -454,91 +556,151 @@ Elimina el historial del usuario para una ruta específica.
 }
 ```
 
-### Anuncios
+## Endpoints de Montañas
+### Obtener todas las montañas
+**GET** `/mountains/`
 
-**GET** `/anuncios`
-#### Descripción: 
-Devuelve los anuncios personalizados para el usuario autenticado (según si es nuevo, ex-premium, etc.).
-
-**Los usuarios premium no reciben anuncios.**
+#### Descripción
+Devuelve una lista con todas las montañas registradas en el sistema.
 
 #### Respuesta (`200 OK`):
 ```json
 [
   {
-    "id_anuncios": 1,
-    "titulo": "¡Hazte Premium!",
-    "contenido": "Consigue 50% de descuento en tu primer mes",
-    "tipo_usuario": "nuevo",
-    "fecha_inicio": "2025-04-01",
-    "fecha_fin": "2025-04-15",
-    "activo": true,
-    "id_suscripciones": 1
+    "id_montanya": 1,
+    "nombre_montanya": "Aiguamolls de l’Empordà",
+    "descripcion": "Parque natural con humedales y aves protegidas.",
+    "dificultad": "Fácil",
+    "acampar": false,
+    "pernoctar": false,
+    "especies_peligrosas": true,
+    "geojson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "MultiLineString",
+            "coordinates": [
+              [
+                [3.051703505, 41.79115305, 3],
+                [3.052206534, 41.791116704, 3.019],
+                ...
+              ]
+            ]
+          },
+          "properties": {
+            "name": "De s'Agaro a Sa Conca",
+            "desc": "name=De s'Agaro a Sa Conca"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id_montanya": 2,
+    "nombre_montanya": "Otra Montaña",
+    "descripcion": "Descripción de otra montaña.",
+    "dificultad": "Difícil",
+    "acampar": true,
+    "pernoctar": true,
+    "especies_peligrosas": false,
+    "geojson": { ... }
   }
 ]
 ```
 
-**GET** `/anuncios-publicos`
+### Obtener una montaña por nombre
+**GET** `/mountains/{nombre_montanya}`
 
-#### Descripción: 
-Devuelve anuncios genéricos, visibles para todos (no personalizados).
+#### Descripción
+Devuelve los datos de una montaña específica utilizando su nombre.
+
+* Parámetros:
+  - nombre_montanya (string): Nombre de la montaña a consultar.
 
 #### Respuesta (`200 OK`):
-
 ```json
-[
-  {
-    "id_anuncios": 7,
-    "titulo": "Explora nuevas rutas",
-    "contenido": "Descubre las mejores rutas de tu zona.",
-    "tipo_usuario": "generico",
-    "fecha_inicio": "2025-04-01",
-    "fecha_fin": null,
-    "activo": true,
-    "id_suscripciones": null
+{
+  "id_montanya": 1,
+  "nombre_montanya": "Aiguamolls de l’Empordà",
+  "descripcion": "Parque natural con humedales y aves protegidas.",
+  "dificultad": "Fácil",
+  "acampar": false,
+  "pernoctar": false,
+  "especies_peligrosas": true,
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": [
+            [
+              [3.051703505, 41.79115305, 3],
+              [3.052206534, 41.791116704, 3.019],
+              ...
+            ]
+          ]
+        },
+        "properties": {
+          "name": "De s'Agaro a Sa Conca",
+          "desc": "name=De s'Agaro a Sa Conca"
+        }
+      }
+    ]
   }
-]
+}
 ```
 
-**POST** `/anuncios`
+### Crear una nueva montaña
+**POST* `/montanyas`
 
-**⚠️ Endpoint para desarrolladores/admins**
-
-#### Descripción: 
-Crea un nuevo anuncio dirigido a un tipo de usuario específico.
+#### Descripción
+Inserta una nueva montaña en la base de datos.
 
 #### Body esperado:
 ```json
 {
-  "titulo": "Vuelve a ser premium",
-  "contenido": "Te damos un 50% por volver",
-  "tipo_usuario": "ex-premium",
-  "fecha_inicio": "2025-04-01",
-  "fecha_fin": "2025-04-15",
-  "activo": true,
-  "id_suscripciones": 2
+  "nombre_montanya": "Aiguamolls de l’Empordà",
+  "descripcion": "Parque natural con humedales y aves protegidas.",
+  "dificultad": "Fácil",
+  "acampar": false,
+  "pernoctar": false,
+  "especies_peligrosas": true,
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": [
+            [
+              [3.051703505, 41.79115305, 3],
+              [3.052206534, 41.791116704, 3.019],
+              ...
+            ]
+          ]
+        },
+        "properties": {
+          "name": "De s'Agaro a Sa Conca",
+          "desc": "name=De s'Agaro a Sa Conca"
+        }
+      }
+    ]
+  }
 }
 ```
+
 #### Respuesta (`200 OK`):
-```json
+```json 
 {
-  "message": "Anuncio creado correctamente"
+  "status": 1,
+  "message": "Montaña insertada correctamente"
 }
 ```
-
-**DELETE** `/anuncios/{id_anuncio}`
-**⚠️ Endpoint para desarrolladores/admins**
-
-#### Descripción: 
-Elimina un anuncio por su ID.
-#### Respuesta (`200 OK`):
-```json
-{
-  "message": "Anuncio eliminado correctamente"
-}
-```
-
-
 ---
 
 # Autenticación y Tokens JWT
@@ -586,7 +748,7 @@ La función crear_token() crea un JWT con el contenido necesario y la expiració
 
 ```python
 def crear_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    # Expira en 60 minutos por defecto
+    # Expira en 720 minutos por defecto
     ...
 ```
 
