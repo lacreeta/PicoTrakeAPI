@@ -14,7 +14,7 @@ from model.modelsBBDD import *
 from auth import *
 
 # Configuración base de datos
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL_SQLALCHEMY")
 engine = create_engine(DATABASE_URL, echo=True)
 
 # JWT Token
