@@ -4,4 +4,3 @@ __pycache__/
 ssl/
 .env*
 *.sql
-start.sh
