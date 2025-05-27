@@ -72,7 +72,7 @@ app.add_middleware(
         "https://www.picotrake.com",
         "http://localhost:5173"
     ],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
