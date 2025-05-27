@@ -76,7 +76,7 @@ app.add_middleware(
 # nginx
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["api.picotrakeclub.tech", "localhost", "127.0.0.1"]
+    allowed_hosts=["api.picotrakeclub.tech", "localhost", "127.0.0.1", "picotrakeapi-production.up.railway.app"]
 )
 
 # Root
